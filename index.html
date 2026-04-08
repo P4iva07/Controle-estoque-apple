@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Estoque Apple</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-bg: #f3f5f8;
+      --color-surface: #ffffff;
+      --color-surface-soft: #f7f8fb;
+      --color-text: #1d1d1f;
+      --color-muted: #65656c;
+      --color-border: rgba(11, 34, 57, 0.10);
+      --color-primary: #0a84ff;
+      --color-primary-strong: #0066d6;
+      --color-warning: #ff9f0a;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow: 0 16px 40px rgba(15, 35, 54, 0.08);
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg: #0b1118;
+        --color-surface: #151c26;
+        --color-surface-soft: #1b2430;
+        --color-text: #f5f7fb;
+        --color-muted: #a9b2c2;
+        --color-border: rgba(255,255,255,0.12);
+        --color-primary: #0a84ff;
+        --color-primary-strong: #5ba7ff;
+        --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      }
+    }
+
+    body {
+      font-family: var(--font);
+      color: var(--color-text);
+      background:
+        radial-gradient(circle at top left, rgba(10,132,255,0.12), transparent 40%),
+        radial-gradient(circle at top right, rgba(127,84,255,0.12), transparent 30%),
+        var(--color-bg);
+      min-height: 100vh;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app-shell {
+      width: min(1100px, 100%);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: clamp(1.1rem, 2vw, 2rem);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.1rem;
+    }
+    .app-title { font-size: clamp(1.05rem, 2.5vw, 1.4rem); font-weight: 650; }
+    .subtitle { margin-left: auto; font-size: .85rem; color: var(--color-muted); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      border: 1px solid var(--color-border);
+      background: transparent;
+      color: var(--color-text);
+      padding: .62rem .95rem;
+      border-radius: 999px;
+      font-size: .9rem;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+    .btn:hover { background: var(--color-surface-soft); }
+    .btn.active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: white;
+    }
+    .btn-primary {
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
+      color: white;
+      border: none;
+      font-weight: 600;
+    }
+    .btn-sm { padding: .5rem .7rem; font-size: .8rem; border-radius: 10px; }
+    .btn-danger { color: #ff453a; border-color: rgba(255,69,58,.45); }
+
+    .section { display: none; }
+    .section.visible { display: block; }
+
+    .sec-desc { font-size: .9rem; color: var(--color-muted); margin-bottom: 1rem; }
+
+    .form-wrap {
+      max-width: 680px;
+      background: var(--color-surface-soft);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: .9rem;
+      align-items: end;
+    }
+    .form-label { display: block; margin-bottom: .42rem; font-size: .82rem; color: var(--color-muted); }
+
+    select, input[type="number"] {
+      width: 100%;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text);
+      border-radius: 10px;
+      padding: .62rem .76rem;
+      font-size: .92rem;
+    }
+
+    .summary-bar { display: flex; flex-wrap: wrap; gap: .7rem; margin-bottom: 1rem; }
+    .metric {
+      flex: 1;
+      min-width: 120px;
+      padding: .8rem .9rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-surface-soft);
+    }
+    .metric-label { font-size: .78rem; color: var(--color-muted); }
+    .metric-value { font-size: 1.35rem; font-weight: 700; }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: .8rem;
+    }
+
+    .product-card {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: .8rem;
+      display: flex;
+      gap: .8rem;
+      background: var(--color-surface);
+      align-items: flex-start;
+    }
+
+    .product-image {
+      width: 74px;
+      height: 74px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-soft);
+      flex-shrink: 0;
+    }
+    .product-model { font-weight: 650; font-size: .95rem; margin-bottom: .2rem; }
+    .product-type { font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--color-muted); margin-bottom: .55rem; }
+    .qty-pill { font-size: .82rem; border-radius: 999px; padding: .2rem .55rem; background: var(--color-surface-soft); display: inline-flex; }
+    .badge { font-size: .65rem; color: var(--color-warning); margin-left: .35rem; }
+
+    .edit-row { display: flex; gap: .45rem; margin-top: .62rem; border-top: 1px solid var(--color-border); padding-top: .55rem; }
+    .edit-row input { width: 80px; }
+
+    .empty-state { text-align: center; color: var(--color-muted); padding: 2rem 1rem; }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: var(--color-text);
+      color: var(--color-surface);
+      padding: .62rem .8rem;
+      border-radius: 10px;
+      opacity: 0;
+      transition: .2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <div class="header">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+      </svg>
+      <span class="app-title">Controle de Estoque Apple</span>
+      <span class="subtitle" id="last-update"></span>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btn-cadastrar" onclick="showSection('cadastrar')">+ Cadastrar produto</button>
+      <button class="btn active" id="btn-estoque" onclick="showSection('estoque')">Ver estoque</button>
+      <button class="btn" id="btn-editar" onclick="showSection('editar')">Editar estoque</button>
+    </div>
+
+    <section id="sec-cadastrar" class="section">
+      <p class="sec-desc">Catálogo com modelos Apple lançados a partir de 2018, organizado por categoria e ano.</p>
+      <div class="form-wrap">
+        <div class="form-grid">
+          <div>
+            <label class="form-label" for="f-tipo">Tipo de produto</label>
+            <select id="f-tipo"></select>
+          </div>
+          <div>
+            <label class="form-label" for="f-modelo">Modelo</label>
+            <select id="f-modelo" disabled></select>
+          </div>
+          <div>
+            <label class="form-label" for="f-qty">Quantidade</label>
+            <input type="number" id="f-qty" min="1" value="1" />
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="cadastrar()">Salvar produto</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-estoque" class="section visible">
+      <div class="summary-bar" id="summary"></div>
+      <div class="card-grid" id="estoque-grid"></div>
+    </section>
+
+    <section id="sec-editar" class="section">
+      <p class="sec-desc">Atualize quantidades ou remova itens cadastrados.</p>
+      <div class="card-grid" id="editar-grid"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const CURRENT_YEAR = new Date().getFullYear();
+    const FALLBACK_UNAVAILABLE_IMAGE = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/320px-No_image_available.svg.png";
+
+    // Catálogo revisado com base em páginas oficiais da Apple (Newsroom/Apple Product Environmental Reports)
+    // e atualizado para refletir os lançamentos disponíveis até 2026.
+    const PRODUCT_CATALOG = {
+      "iPhone": [
+        { modelo: "iPhone XR", ano: 2018, img: "https://http2.mlstatic.com/D_NQ_NP_848664-MLA95743631750_102025-O.webp" },
+        { modelo: "iPhone XS", ano: 2018, img: "https://trocafone.vtexassets.com/arquivos/ids/431136-800-450?v=638924178620630000&width=800&height=450&aspect=true" },
+        { modelo: "iPhone XS Max", ano: 2018, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/IPhone_XS_Max.png/240px-IPhone_XS_Max.png" },
+        { modelo: "iPhone 11", ano: 2019, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/IPhone_11_Pro_Max_Midnight_Green.svg/240px-IPhone_11_Pro_Max_Midnight_Green.svg.png" },
+        { modelo: "iPhone 11 Pro", ano: 2019, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/IPhone_11_Pro_Max.svg/240px-IPhone_11_Pro_Max.svg.png" },
+        { modelo: "iPhone 11 Pro Max", ano: 2019, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/IPhone_11_Pro_Max_%28cropped%29.png/240px-IPhone_11_Pro_Max_%28cropped%29.png" },
+        { modelo: "iPhone SE (2ª geração)", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/IPhone_SE_2nd_Gen.svg/240px-IPhone_SE_2nd_Gen.svg.png" },
+        { modelo: "iPhone 12", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/IPhone_12_Blue.svg/240px-IPhone_12_Blue.svg.png" },
+        { modelo: "iPhone 12 mini", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/IPhone_12_Mini_Blue.svg/240px-IPhone_12_Mini_Blue.svg.png" },
+        { modelo: "iPhone 12 Pro", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/IPhone_12_Pro_Graphite.svg/240px-IPhone_12_Pro_Graphite.svg.png" },
+        { modelo: "iPhone 12 Pro Max", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/IPhone_12_Pro_Max_Pacific_Blue.svg/240px-IPhone_12_Pro_Max_Pacific_Blue.svg.png" },
+        { modelo: "iPhone 13", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/IPhone_13_Pro_graphite.svg/240px-IPhone_13_Pro_graphite.svg.png" },
+        { modelo: "iPhone 13 mini", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/IPhone_13_mini_Pink.svg/240px-IPhone_13_mini_Pink.svg.png" },
+        { modelo: "iPhone 13 Pro", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/IPhone_13_Pro_Midnight.svg/240px-IPhone_13_Pro_Midnight.svg.png" },
+        { modelo: "iPhone 13 Pro Max", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/IPhone_13_Pro_Max_Graphite.svg/240px-IPhone_13_Pro_Max_Graphite.svg.png" },
+        { modelo: "iPhone SE (3ª geração)", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/IPhone_SE_3rd_Gen.svg/240px-IPhone_SE_3rd_Gen.svg.png" },
+        { modelo: "iPhone 14", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/IPhone_14_Pro.svg/240px-IPhone_14_Pro.svg.png" },
+        { modelo: "iPhone 14 Plus", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/IPhone_14_Plus.svg/240px-IPhone_14_Plus.svg.png" },
+        { modelo: "iPhone 14 Pro", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/IPhone_14_Pro_Deep_Purple.svg/240px-IPhone_14_Pro_Deep_Purple.svg.png" },
+        { modelo: "iPhone 14 Pro Max", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/IPhone_14_Pro_Max.svg/240px-IPhone_14_Pro_Max.svg.png" },
+        { modelo: "iPhone 15", ano: 2023, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/IPhone_15_Black.svg/240px-IPhone_15_Black.svg.png" },
+        { modelo: "iPhone 15 Plus", ano: 2023, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/IPhone_15_Plus_Blue.svg/240px-IPhone_15_Plus_Blue.svg.png" },
+        { modelo: "iPhone 15 Pro", ano: 2023, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IPhone_15_Pro_Natural_Titanium.svg/240px-IPhone_15_Pro_Natural_Titanium.svg.png" },
+        { modelo: "iPhone 15 Pro Max", ano: 2023, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/IPhone_15_Pro_Max_Natural_Titanium.svg/240px-IPhone_15_Pro_Max_Natural_Titanium.svg.png" },
+        { modelo: "iPhone 16", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/IPhone_16_Pink.svg/240px-IPhone_16_Pink.svg.png" },
+        { modelo: "iPhone 16 Plus", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/IPhone_16_Pink.svg/240px-IPhone_16_Pink.svg.png" },
+        { modelo: "iPhone 16 Pro", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IPhone_16_Pro_Desert_Titanium.svg/240px-IPhone_16_Pro_Desert_Titanium.svg.png" },
+        { modelo: "iPhone 16 Pro Max", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IPhone_16_Pro_Desert_Titanium.svg/240px-IPhone_16_Pro_Desert_Titanium.svg.png" },
+        { modelo: "iPhone 17", ano: 2025, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/IPhone_16_Pink.svg/240px-IPhone_16_Pink.svg.png" },
+        { modelo: "iPhone Air", ano: 2025, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/IPhone_16_Pink.svg/240px-IPhone_16_Pink.svg.png" },
+        { modelo: "iPhone 17 Pro", ano: 2025, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IPhone_16_Pro_Desert_Titanium.svg/240px-IPhone_16_Pro_Desert_Titanium.svg.png" },
+        { modelo: "iPhone 17 Pro Max", ano: 2025, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IPhone_16_Pro_Desert_Titanium.svg/240px-IPhone_16_Pro_Desert_Titanium.svg.png" },
+        { modelo: "iPhone 17e", ano: 2026, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/IPhone_16_Pink.svg/240px-IPhone_16_Pink.svg.png" }
+      ],
+      "MacBook": [
+        { modelo: "MacBook Pro 15\" (2018)", ano: 2018, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/MacBook_Pro_2018.png/320px-MacBook_Pro_2018.png" },
+        { modelo: "MacBook Air (Retina, 2018)", ano: 2018, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/MacBook_Air_2018.png/320px-MacBook_Air_2018.png" },
+        { modelo: "MacBook Pro 13\" (2018)", ano: 2018, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/MacBook_Pro_2018.png/320px-MacBook_Pro_2018.png" },
+        { modelo: "MacBook Air (Retina, 2019)", ano: 2019, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/MacBook_Air_2018.png/320px-MacBook_Air_2018.png" },
+        { modelo: "MacBook Pro 16\" (2019)", ano: 2019, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/MacBook_Pro_2018.png/320px-MacBook_Pro_2018.png" },
+        { modelo: "MacBook Air M1", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/MacBook_Air_M1.jpg/320px-MacBook_Air_M1.jpg" },
+        { modelo: "MacBook Pro 13\" M1", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/MacBook_Pro_M1.png/320px-MacBook_Pro_M1.png" },
+        { modelo: "MacBook Pro 14\" M1 Pro/Max", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/MacBook_Pro_14_M1.jpg/320px-MacBook_Pro_14_M1.jpg" },
+        { modelo: "MacBook Pro 16\" M1 Pro/Max", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/MacBook_Pro_14_M1.jpg/320px-MacBook_Pro_14_M1.jpg" },
+        { modelo: "MacBook Air M2", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/MacBook_Air_M2.jpg/320px-MacBook_Air_M2.jpg" },
+        { modelo: "MacBook Pro 13\" M2", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/MacBook_Pro_M1.png/320px-MacBook_Pro_M1.png" },
+        { modelo: "MacBook Pro M3", ano: 2023, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/MacBook_Pro_M3.jpg/320px-MacBook_Pro_M3.jpg" },
+        { modelo: "MacBook Air M3", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/MacBook_Air_M3.jpg/320px-MacBook_Air_M3.jpg" },
+        { modelo: "MacBook Air M4", ano: 2025, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/MacBook_Air_M3.jpg/320px-MacBook_Air_M3.jpg" },
+        { modelo: "MacBook Air M5", ano: 2026, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/MacBook_Air_M3.jpg/320px-MacBook_Air_M3.jpg" },
+        { modelo: "MacBook Pro M5 Pro/Max", ano: 2026, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/MacBook_Pro_M3.jpg/320px-MacBook_Pro_M3.jpg" }
+      ],
+      "iPad": [
+        { modelo: "iPad (6ª geração)", ano: 2018, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/IPad_6th_Gen.svg/240px-IPad_6th_Gen.svg.png" },
+        { modelo: "iPad Pro 12,9\" (3ª geração)", ano: 2018, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/IPad_Pro_12.9_2018.svg/240px-IPad_Pro_12.9_2018.svg.png" },
+        { modelo: "iPad (7ª geração)", ano: 2019, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/IPad_7.svg/240px-IPad_7.svg.png" },
+        { modelo: "iPad mini (5ª geração)", ano: 2019, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/IPad_mini_5.svg/240px-IPad_mini_5.svg.png" },
+        { modelo: "iPad Air (3ª geração)", ano: 2019, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/IPad_Air_3.svg/240px-IPad_Air_3.svg.png" },
+        { modelo: "iPad Pro 11\" (1ª geração)", ano: 2018, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/IPad_Pro_11_2018.svg/240px-IPad_Pro_11_2018.svg.png" },
+        { modelo: "iPad (8ª geração)", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/IPad_8.svg/240px-IPad_8.svg.png" },
+        { modelo: "iPad Air (4ª geração)", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/IPad_Air_4.svg/240px-IPad_Air_4.svg.png" },
+        { modelo: "iPad Pro (2020)", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/IPad_Pro_11_2018.svg/240px-IPad_Pro_11_2018.svg.png" },
+        { modelo: "iPad (9ª geração)", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/IPad_9.svg/240px-IPad_9.svg.png" },
+        { modelo: "iPad mini (6ª geração)", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/IPad_Mini_6.svg/240px-IPad_Mini_6.svg.png" },
+        { modelo: "iPad Pro M1", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/IPad_Pro_M1.svg/240px-IPad_Pro_M1.svg.png" },
+        { modelo: "iPad (10ª geração)", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/IPad_10.svg/240px-IPad_10.svg.png" },
+        { modelo: "iPad Air (5ª geração)", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/IPad_Air_5.svg/240px-IPad_Air_5.svg.png" },
+        { modelo: "iPad Pro M2", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/IPad_Pro_M2.svg/240px-IPad_Pro_M2.svg.png" },
+        { modelo: "iPad mini (7ª geração)", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/IPad_Mini_6.svg/240px-IPad_Mini_6.svg.png" },
+        { modelo: "iPad Pro M4", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/IPad_Pro_M4.svg/240px-IPad_Pro_M4.svg.png" },
+        { modelo: "iPad Air M2", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/IPad_Air_M2.svg/240px-IPad_Air_M2.svg.png" },
+        { modelo: "iPad Air M4", ano: 2026, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/IPad_Air_M2.svg/240px-IPad_Air_M2.svg.png" }
+      ],
+      "Apple Watch": [
+        { modelo: "Apple Watch Series 4", ano: 2018, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Apple_Watch_Series_4.png/240px-Apple_Watch_Series_4.png" },
+        { modelo: "Apple Watch Series 5", ano: 2019, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Apple_Watch_Series_5.png/240px-Apple_Watch_Series_5.png" },
+        { modelo: "Apple Watch SE (1ª geração)", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Apple_Watch_SE_1st_Gen.png/240px-Apple_Watch_SE_1st_Gen.png" },
+        { modelo: "Apple Watch Series 6", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Apple_Watch_Series_6.png/240px-Apple_Watch_Series_6.png" },
+        { modelo: "Apple Watch Series 7", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Apple_Watch_Series_7.png/240px-Apple_Watch_Series_7.png" },
+        { modelo: "Apple Watch SE (2ª geração)", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Apple_Watch_SE_2nd_Gen.png/240px-Apple_Watch_SE_2nd_Gen.png" },
+        { modelo: "Apple Watch Series 8", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Apple_Watch_Series_8.png/240px-Apple_Watch_Series_8.png" },
+        { modelo: "Apple Watch Ultra", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Apple_Watch_Ultra.png/240px-Apple_Watch_Ultra.png" },
+        { modelo: "Apple Watch Series 9", ano: 2023, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Apple_Watch_Series_9.png/240px-Apple_Watch_Series_9.png" },
+        { modelo: "Apple Watch Ultra 2", ano: 2023, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Apple_Watch_Ultra_2.png/240px-Apple_Watch_Ultra_2.png" },
+        { modelo: "Apple Watch Series 10", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Apple_Watch_Series_10.png/240px-Apple_Watch_Series_10.png" },
+        { modelo: "Apple Watch Series 11", ano: 2025, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Apple_Watch_Series_10.png/240px-Apple_Watch_Series_10.png" },
+        { modelo: "Apple Watch Ultra 3", ano: 2025, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Apple_Watch_Ultra_2.png/240px-Apple_Watch_Ultra_2.png" },
+        { modelo: "Apple Watch SE (3ª geração)", ano: 2025, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Apple_Watch_SE_2nd_Gen.png/240px-Apple_Watch_SE_2nd_Gen.png" }
+      ],
+      "AirPods": [
+        { modelo: "AirPods (2ª geração)", ano: 2019, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Apple_AirPods_2nd_gen.jpg/240px-Apple_AirPods_2nd_gen.jpg" },
+        { modelo: "AirPods Pro (1ª geração)", ano: 2019, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/AirPods_Pro.png/240px-AirPods_Pro.png" },
+        { modelo: "AirPods Max", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/AirPods_Max.png/240px-AirPods_Max.png" },
+        { modelo: "AirPods (3ª geração)", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/AirPods_3rd_generation.png/240px-AirPods_3rd_generation.png" },
+        { modelo: "AirPods Pro (2ª geração)", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/AirPods_Pro_2nd_generation.png/240px-AirPods_Pro_2nd_generation.png" },
+        { modelo: "AirPods 4", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/AirPods_3rd_generation.png/240px-AirPods_3rd_generation.png" },
+        { modelo: "AirPods 4 (ANC)", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/AirPods_3rd_generation.png/240px-AirPods_3rd_generation.png" },
+        { modelo: "AirPods Pro 3", ano: 2025, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/AirPods_Pro_2nd_generation.png/240px-AirPods_Pro_2nd_generation.png" }
+      ],
+      "iMac": [
+        { modelo: "iMac 24\" M1", ano: 2021, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/IMac_M1_Blue.png/320px-IMac_M1_Blue.png" },
+        { modelo: "iMac M3", ano: 2023, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/IMac_M3.jpg/320px-IMac_M3.jpg" }
+      ],
+      "Mac mini / Mac Studio": [
+        { modelo: "Mac mini (2018)", ano: 2018, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Mac_mini_2018.svg/240px-Mac_mini_2018.svg.png" },
+        { modelo: "Mac mini M1", ano: 2020, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Mac_mini_M2.png/240px-Mac_mini_M2.png" },
+        { modelo: "Mac Studio M1 Max/Ultra", ano: 2022, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Mac_Studio.png/320px-Mac_Studio.png" },
+        { modelo: "Mac mini M2", ano: 2023, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Mac_mini_M2.png/240px-Mac_mini_M2.png" },
+        { modelo: "Mac mini M4", ano: 2024, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Mac_mini_M4.jpg/320px-Mac_mini_M4.jpg" },
+        { modelo: "Mac Studio M4 Max", ano: 2025, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Mac_Studio.png/320px-Mac_Studio.png" }
+      ]
+    };
+
+    let produtos = [];
+
+    function normalizeModelName(value) {
+      return (value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function buildCatalogMap() {
+      const map = {};
+      Object.entries(PRODUCT_CATALOG).forEach(([tipo, modelos]) => {
+        modelos
+          .filter((item) => item.ano >= 2018 && item.ano <= CURRENT_YEAR)
+          .sort((a, b) => b.ano - a.ano || a.modelo.localeCompare(b.modelo))
+          .forEach((item) => {
+            map[normalizeModelName(item.modelo)] = { tipo, modelo: item.modelo, ano: item.ano, img: item.img };
+          });
+      });
+      return map;
+    }
+
+    const MODEL_LOOKUP = buildCatalogMap();
+
+    function populateTipo() {
+      const tipoSel = document.getElementById('f-tipo');
+      tipoSel.innerHTML = '<option value="">Selecione o tipo...</option>';
+      Object.keys(PRODUCT_CATALOG).sort().forEach((tipo) => {
+        const modelosAtivos = PRODUCT_CATALOG[tipo].filter((item) => item.ano >= 2018 && item.ano <= CURRENT_YEAR);
+        const opt = document.createElement('option');
+        opt.value = tipo;
+        opt.textContent = `${tipo} (${modelosAtivos.length} modelos)`;
+        tipoSel.appendChild(opt);
+      });
+    }
+
+    function populateModelos(tipo) {
+      const modelSel = document.getElementById('f-modelo');
+      modelSel.innerHTML = '<option value="">Selecione o modelo...</option>';
+      if (!tipo || !PRODUCT_CATALOG[tipo]) {
+        modelSel.disabled = true;
+        return;
+      }
+
+      const grouped = PRODUCT_CATALOG[tipo]
+        .filter((item) => item.ano >= 2018 && item.ano <= CURRENT_YEAR)
+        .reduce((acc, item) => {
+        if (!acc[item.ano]) acc[item.ano] = [];
+        acc[item.ano].push(item);
+        return acc;
+      }, {});
+
+      Object.keys(grouped).sort((a, b) => b - a).forEach((ano) => {
+        const group = document.createElement('optgroup');
+        group.label = `Modelos ${ano}`;
+        grouped[ano]
+          .sort((a, b) => a.modelo.localeCompare(b.modelo))
+          .forEach((item) => {
+            const opt = document.createElement('option');
+            opt.value = item.modelo;
+            opt.textContent = item.modelo;
+            group.appendChild(opt);
+          });
+        modelSel.appendChild(group);
+      });
+
+      modelSel.disabled = false;
+    }
+
+    function card(p, i, edit) {
+      const low = p.qty <= 2;
+      return `
+        <div class="product-card">
+          <img class="product-image" src="${p.img || FALLBACK_UNAVAILABLE_IMAGE}" alt="${p.modelo}" loading="lazy" onerror="this.src='${FALLBACK_UNAVAILABLE_IMAGE}'" />
+          <div>
+            <div class="product-model">${p.modelo}${low && !edit ? '<span class="badge">Estoque baixo</span>' : ''}</div>
+            <div class="product-type">${p.tipo} • ${p.ano}</div>
+            <div class="qty-pill"><strong>${p.qty}</strong>&nbsp;unid.</div>
+            ${edit ? `
+            <div class="edit-row">
+              <input type="number" min="1" value="${p.qty}" onchange="updateQty(${i}, this.value)" />
+              <button class="btn btn-sm btn-danger" onclick="remover(${i})">Remover</button>
+            </div>` : ''}
+          </div>
+        </div>`;
+    }
+
+    function renderEstoque() {
+      const grid = document.getElementById('estoque-grid');
+      const sumEl = document.getElementById('summary');
+
+      if (!produtos.length) {
+        sumEl.innerHTML = '';
+        grid.innerHTML = '<div class="empty-state">📦 Nenhum produto cadastrado. Use “Cadastrar produto”.</div>';
+        return;
+      }
+
+      const total = produtos.reduce((s, p) => s + p.qty, 0);
+      const tipos = new Set(produtos.map((p) => p.tipo)).size;
+      const low = produtos.filter((p) => p.qty <= 2).length;
+
+      sumEl.innerHTML = `
+        <div class="metric"><div class="metric-label">Modelos</div><div class="metric-value">${produtos.length}</div></div>
+        <div class="metric"><div class="metric-label">Itens em estoque</div><div class="metric-value">${total}</div></div>
+        <div class="metric"><div class="metric-label">Categorias</div><div class="metric-value">${tipos}</div></div>
+        <div class="metric"><div class="metric-label">Estoque baixo</div><div class="metric-value" style="color:var(--color-warning)">${low}</div></div>
+      `;
+
+      grid.innerHTML = produtos.map((p, i) => card(p, i, false)).join('');
+    }
+
+    function renderEditar() {
+      const grid = document.getElementById('editar-grid');
+      if (!produtos.length) {
+        grid.innerHTML = '<div class="empty-state">📦 Nenhum produto para editar.</div>';
+        return;
+      }
+      grid.innerHTML = produtos.map((p, i) => card(p, i, true)).join('');
+    }
+
+    function showSection(name) {
+      ['cadastrar', 'estoque', 'editar'].forEach((s) => {
+        document.getElementById('sec-' + s).classList.remove('visible');
+        document.getElementById('btn-' + s).classList.remove('active');
+      });
+      document.getElementById('sec-' + name).classList.add('visible');
+      document.getElementById('btn-' + name).classList.add('active');
+      if (name === 'estoque') renderEstoque();
+      if (name === 'editar') renderEditar();
+    }
+
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    function setLastUpdate() {
+      const el = document.getElementById('last-update');
+      el.textContent = produtos.length ? `${produtos.length} modelo(s) cadastrado(s)` : `Catálogo Apple 2018-${CURRENT_YEAR}`;
+    }
+
+    function saveLocal() {
+      localStorage.setItem('apple-stock-v3', JSON.stringify(produtos));
+      setLastUpdate();
+    }
+
+    function loadLocal() {
+      try {
+        const rawV3 = localStorage.getItem('apple-stock-v3');
+        const rawV2 = localStorage.getItem('apple-stock-v2');
+        produtos = rawV3 ? JSON.parse(rawV3) : (rawV2 ? JSON.parse(rawV2) : []);
+        produtos = produtos.map((p) => {
+          const base = MODEL_LOOKUP[normalizeModelName(p.modelo)] || {};
+          return {
+            tipo: p.tipo || base.tipo || 'Produto',
+            modelo: base.modelo || p.modelo,
+            ano: p.ano || base.ano || 0,
+            qty: p.qty || 1,
+            img: (p.img && !p.img.includes('placehold.co')) ? p.img : (base.img || FALLBACK_UNAVAILABLE_IMAGE)
+          };
+        });
+      } catch (_) {
+        produtos = [];
+      }
+    }
+
+    function cadastrar() {
+      const tipo = document.getElementById('f-tipo').value;
+      const modelo = document.getElementById('f-modelo').value;
+      const qty = parseInt(document.getElementById('f-qty').value, 10) || 1;
+
+      if (!tipo) { toast('Selecione o tipo de produto.'); return; }
+      if (!modelo) { toast('Selecione um modelo do catálogo.'); return; }
+      if (qty < 1) { toast('Quantidade deve ser maior que zero.'); return; }
+
+      const key = normalizeModelName(modelo);
+      const base = MODEL_LOOKUP[key];
+      const idx = produtos.findIndex((p) => normalizeModelName(p.modelo) === key);
+
+      if (idx >= 0) {
+        produtos[idx].qty += qty;
+        toast(`Quantidade de "${modelo}" atualizada.`);
+      } else {
+        produtos.push({ tipo: base.tipo, modelo, ano: base.ano, img: base.img || FALLBACK_UNAVAILABLE_IMAGE, qty });
+        toast(`"${modelo}" cadastrado com sucesso.`);
+      }
+
+      saveLocal();
+      document.getElementById('f-modelo').value = '';
+      document.getElementById('f-qty').value = '1';
+      renderEstoque();
+    }
+
+    function remover(i) {
+      const nome = produtos[i].modelo;
+      produtos.splice(i, 1);
+      saveLocal();
+      renderEditar();
+      toast(`"${nome}" removido.`);
+    }
+
+    function updateQty(i, val) {
+      const n = parseInt(val, 10);
+      if (n > 0) {
+        produtos[i].qty = n;
+        saveLocal();
+        toast('Quantidade atualizada.');
+      }
+    }
+
+    document.getElementById('f-tipo').addEventListener('change', (e) => populateModelos(e.target.value));
+
+    populateTipo();
+    populateModelos('');
+    loadLocal();
+    setLastUpdate();
+    renderEstoque();
+  </script>
+</body>
+</html>
