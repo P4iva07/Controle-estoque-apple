@@ -1,0 +1,3296 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Insumos • Controle Inteligente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap');
+        
+        :root {
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        .apple-header {
+            background: linear-gradient(to right, #f8f9fa, #f1f3f5);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+            transition: background 0.3s ease;
+        }
+        
+        .dark .apple-header {
+            background: linear-gradient(to right, #18181b, #09090b);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.05);
+        }
+        /* ==================== GRID ESTOQUE TOTALMENTE RESPONSIVO ==================== */
+#grid-estoque {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+/* Desktop Large (1920px+) */
+@media (min-width: 1536px) {
+    #grid-estoque {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 2rem;
+    }
+}
+
+/* Desktop (1280px+) */
+@media (min-width: 1025px) and (max-width: 1535px) {
+    #grid-estoque {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+/* Tablet Large (1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    #grid-estoque {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+/* Tablet (768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    #grid-estoque {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .card-hover {
+        padding: 1.25rem;
+    }
+}
+
+/* Mobile Large (480px) */
+@media (max-width: 480px) {
+    #grid-estoque {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0.5rem;
+    }
+    
+    .card-hover {
+        padding: 1.5rem 1.25rem;
+    }
+    
+    /* Busca ocupa tela toda */
+    #busca {
+        width: 100% !important;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Mobile Pequeno (360px-) */
+@media (max-width: 360px) {
+    #grid-estoque {
+        gap: 0.75rem;
+    }
+    
+    .card-hover img {
+        width: 64px !important;
+        height: 64px !important;
+    }
+    
+    .card-hover h4 {
+        font-size: 1rem !important;
+    }
+}
+
+/* ==================== CARDS RESPONSIVOS ==================== */
+/* Desktop */
+@media (min-width: 1025px) {
+    .card-hover {
+        min-height: 420px;
+    }
+    
+    .card-hover img {
+        width: 128px;
+        height: 128px;
+    }
+}
+
+/* Tablet */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .card-hover {
+        min-height: 380px;
+        padding: 1.5rem;
+    }
+    
+    .card-hover img {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .card-hover {
+        min-height: 340px;
+        padding: 1.25rem;
+    }
+    
+    .card-hover img {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .card-hover h4 {
+        font-size: 1.1rem;
+    }
+    
+    .card-hover .text-2xl {
+        font-size: 1.75rem !important;
+    }
+}
+
+/* Mobile Pequeno */
+@media (max-width: 480px) {
+    .card-hover {
+        min-height: auto;
+        padding: 1rem;
+    }
+    
+    .card-hover .w-full.bg-zinc-50 {
+        padding: 0.75rem;
+    }
+}
+
+/* ==================== HOVER MELHORADO MOBILE ==================== */
+@media (hover: none) and (pointer: coarse) {
+    .card-hover:hover {
+        transform: none !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Specs sempre visíveis no mobile (toque longo) */
+    .group-hover\:opacity-100 {
+        opacity: 0.95 !important;
+    }
+}
+
+/* ==================== CONTAINER DA SEÇÃO ==================== */
+#section-estoque {
+    padding-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    #section-estoque .flex.justify-between {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    #section-estoque h2 {
+        text-align: center;
+        font-size: 1.75rem;
+    }
+}
+/* ==================== MELHORIAS NO HOVER - MODO LIGHT ==================== */
+.light .group:hover .absolute.inset-0 {
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.95) 0%, rgba(31, 41, 55, 0.9) 50%, rgba(17, 24, 39, 0.8) 100%);
+}
+
+.light .group:hover h4 {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.light .group:hover .font-semibold.text-white {
+    color: #f8fafc !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.light .group:hover .text-zinc-400,
+.light .group:hover .text-zinc-300 {
+    color: #d1d5db !important; /* gray-300 */
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.light .group:hover .text-emerald-300 {
+    color: #6ee7b7 !important; /* emerald-300 */
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.light .group:hover .uppercase.tracking-wider {
+    color: #9ca3af !important; /* gray-400 */
+    font-weight: 600;
+}
+
+/* Labels dos ícones no header do hover */
+.light .group:hover .text-lg {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+.light .group:hover .capitalize {
+    color: #e5e7eb !important; /* gray-200 */
+}
+
+/* Ícone info */
+.light .group:hover .fa-info-circle {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Backdrop do ícone */
+.light .group:hover .bg-white\/20 {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(12px);
+}
+
+/* Borda inferior */
+.light .group:hover .border-white\/20 {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Transições suaves */
+.light .group .opacity-0 {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.light .group:hover .opacity-0 {
+    opacity: 1 !important;
+}
+/* ==================== AIRPODS - APENAS PROCESSADOR + BATERIA ==================== */
+.group:hover [class*="AirPods"] ~ .absolute.inset-0 {
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+}
+
+.group:hover [class*="AirPods"] ~ .absolute.inset-0 .grid-cols-2 > div:nth-child(n+2):not(:last-child) {
+    display: none !important; /* Esconde memória, armazenamento, tela */
+}
+
+.group:hover [class*="AirPods"] ~ .absolute.inset-0 .pt-2,
+.group:hover [class*="AirPods"] ~ .absolute.inset-0 .border-t,
+.group:hover [class*="AirPods"] ~ .absolute.inset-0 .flex.items-center.justify-between {
+    display: none !important; /* Esconde câmera */
+}
+
+.group:hover [class*="AirPods"] ~ .absolute.inset-0 .grid-cols-2 > div:last-child {
+    grid-column: 1 / -1 !important;
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(255,255,255,0.3);
+}
+
+.group:hover [class*="AirPods"] ~ .absolute.inset-0 .text-emerald-300 {
+    font-size: 1.2rem !important;
+    font-weight: 700;
+    color: #10b981 !important;
+}/* ==================== GRID ESTOQUE TOTALMENTE RESPONSIVO ==================== */
+#grid-estoque {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+/* Desktop Large (1920px+) */
+@media (min-width: 1536px) {
+    #grid-estoque {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 2rem;
+    }
+}
+
+/* Desktop (1280px+) */
+@media (min-width: 1025px) and (max-width: 1535px) {
+    #grid-estoque {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+/* Tablet Large (1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    #grid-estoque {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+/* Tablet (768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    #grid-estoque {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .card-hover {
+        padding: 1.25rem;
+    }
+}
+
+/* Mobile Large (480px) */
+@media (max-width: 480px) {
+    #grid-estoque {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0.5rem;
+    }
+    
+    .card-hover {
+        padding: 1.5rem 1.25rem;
+    }
+    
+    /* Busca ocupa tela toda */
+    #busca {
+        width: 100% !important;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Mobile Pequeno (360px-) */
+@media (max-width: 360px) {
+    #grid-estoque {
+        gap: 0.75rem;
+    }
+    
+    .card-hover img {
+        width: 64px !important;
+        height: 64px !important;
+    }
+    
+    .card-hover h4 {
+        font-size: 1rem !important;
+    }
+}
+
+/* ==================== CARDS RESPONSIVOS ==================== */
+/* Desktop */
+@media (min-width: 1025px) {
+    .card-hover {
+        min-height: 420px;
+    }
+    
+    .card-hover img {
+        width: 128px;
+        height: 128px;
+    }
+}
+
+/* Tablet */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .card-hover {
+        min-height: 380px;
+        padding: 1.5rem;
+    }
+    
+    .card-hover img {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .card-hover {
+        min-height: 340px;
+        padding: 1.25rem;
+    }
+    
+    .card-hover img {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .card-hover h4 {
+        font-size: 1.1rem;
+    }
+    
+    .card-hover .text-2xl {
+        font-size: 1.75rem !important;
+    }
+}
+
+/* Mobile Pequeno */
+@media (max-width: 480px) {
+    .card-hover {
+        min-height: auto;
+        padding: 1rem;
+    }
+    
+    .card-hover .w-full.bg-zinc-50 {
+        padding: 0.75rem;
+    }
+}
+
+/* ==================== HOVER MELHORADO MOBILE ==================== */
+@media (hover: none) and (pointer: coarse) {
+    .card-hover:hover {
+        transform: none !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Specs sempre visíveis no mobile (toque longo) */
+    .group-hover\:opacity-100 {
+        opacity: 0.95 !important;
+    }
+}
+
+/* ==================== CONTAINER DA SEÇÃO ==================== */
+#section-estoque {
+    padding-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    #section-estoque .flex.justify-between {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    #section-estoque h2 {
+        text-align: center;
+        font-size: 1.75rem;
+    }
+}
+/* ==================== MODAL PRODUTO - ESTILO ELEGANTE ==================== */
+#modal-produto {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+#modal-produto.mostrar {
+    opacity: 1;
+    visibility: visible;
+}
+
+#modal-produto::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);
+    animation: fadeInOverlay 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-conteudo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    max-width: 1000px;
+    width: calc(100% - 2rem);
+    max-height: 95vh;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-radius: 2.5rem;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+#modal-produto.mostrar .modal-conteudo {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    animation: slideUpModal 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUpModal {
+    0% {
+        transform: translate(-50%, -50%) scale(0.9) translateY(30px);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.dark .modal-conteudo {
+    background: rgba(17, 24, 39, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ==================== HEADER MODAL ==================== */
+.header-modal {
+    padding: 2rem 2.5rem 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.dark .header-modal {
+    background: linear-gradient(135deg, rgba(31,41,55,0.9) 0%, rgba(17,24,39,0.7) 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.header-modal h2 {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+}
+
+.dark .header-modal h2 {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* ==================== CONTEÚDO PRINCIPAL ==================== */
+.conteudo-modal {
+    padding: 2rem 2.5rem 2.5rem;
+    height: calc(95vh - 140px);
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.conteudo-modal::-webkit-scrollbar {
+    display: none;
+}
+
+/* ==================== MÉTRICAS GRID ==================== */
+.metricas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.card-metrica {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px);
+    border-radius: 2rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-metrica::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card-metrica:hover {
+    transform: translateY(-8px);
+    box-shadow: 
+        0 20px 40px rgba(0,0,0,0.15),
+        0 0 0 1px rgba(255,255,255,0.3);
+}
+
+.card-metrica:hover::before {
+    opacity: 1;
+}
+
+.dark .card-metrica {
+    background: rgba(31, 41, 55, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .card-metrica:hover {
+    box-shadow: 
+        0 20px 40px rgba(0,0,0,0.4),
+        0 0 0 1px rgba(255,255,255,0.1);
+}
+
+/* Ícones das métricas */
+.card-metrica > div:first-child {
+    box-shadow: 
+        0 8px 24px rgba(0,0,0,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+}
+
+.card-metrica:hover > div:first-child {
+    transform: scale(1.05) rotate(2deg);
+}
+
+/* ==================== GRÁFICO ==================== */
+.grafico-container {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.dark .grafico-container {
+    background: rgba(31, 41, 55, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.grafico-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+}
+
+.grafico-container h3 {
+    background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    margin-bottom: 2rem;
+}
+
+/* ==================== TABELA HISTÓRICO ==================== */
+.tabela-historico {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+    border-radius: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    max-height: 400px;
+}
+
+.dark .tabela-historico {
+    background: rgba(31, 41, 55, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tabela-historico > div:first-child {
+    background: linear-gradient(135deg, 
+        rgba(254, 252, 232, 0.9) 0%, 
+        rgba(254, 250, 224, 0.8) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+.dark .tabela-historico > div:first-child {
+    background: linear-gradient(135deg, 
+        rgba(101, 79, 13, 0.3) 0%, 
+        rgba(113, 89, 18, 0.2) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+#historico-vendas {
+    max-height: 320px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+}
+
+#historico-vendas::-webkit-scrollbar {
+    width: 6px;
+}
+
+#historico-vendas::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#historico-vendas::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+    border-radius: 3px;
+}
+
+#historico-vendas::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.5);
+}
+
+/* ==================== SELECT PERÍODO ==================== */
+#periodo-modal {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0,0,0,0.1);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+#periodo-modal:focus {
+    border-color: #4f46e5;
+    box-shadow: 
+        0 0 0 3px rgba(79, 70, 229, 0.1),
+        0 8px 24px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+
+.dark #periodo-modal {
+    background: rgba(39, 39, 42, 0.9);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.dark #periodo-modal:focus {
+    border-color: #6366f1;
+    box-shadow: 
+        0 0 0 3px rgba(99, 102, 241, 0.2),
+        0 8px 24px rgba(0,0,0,0.3);
+}
+
+/* ==================== BOTÃO FECHAR ==================== */
+button[onclick="fecharModalProduto()"] {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+button[onclick="fecharModalProduto()"]:hover {
+    transform: scale(1.05) rotate(90deg);
+    background: rgba(0,0,0,0.1) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.dark button[onclick="fecharModalProduto()"]:hover {
+    background: rgba(255,255,255,0.1) !important;
+}
+
+/* ==================== RESPONSIVO ==================== */
+@media (max-width: 768px) {
+    .modal-conteudo {
+        width: calc(100% - 1.5rem);
+        max-height: 98vh;
+        border-radius: 1.5rem;
+        margin: 0 0.75rem;
+    }
+    
+    .header-modal,
+    .conteudo-modal {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+    
+    .metricas-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+    }
+    
+    .card-metrica {
+        padding: 1.5rem 1rem;
+    }
+    
+    .grafico-container {
+        padding: 1.5rem;
+    }
+    
+    .tabela-historico {
+        max-height: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .metricas-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    #historico-vendas {
+        max-height: 280px;
+    }
+}
+
+/* ==================== MICRO-ANIMAÇÕES ==================== */
+@keyframes shimmer {
+    0% { background-position: -468px 0; }
+    100% { background-position: 468px 0; }
+}
+
+.card-metrica:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.4),
+        transparent
+    );
+    animation: shimmer 1s infinite;
+}
+    </style>
+</head>
+<body class="bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
+
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-zinc-900 p-10 rounded-3xl shadow-xl border border-zinc-100 dark:border-zinc-800 w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-2xl flex items-center justify-center text-3xl font-bold mx-auto mb-4"></div>
+                <h1 class="text-2xl font-semibold tracking-tight">Gestão de Insumos</h1>
+                <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-2">Faça login para acessar o sistema</p>
+            </div>
+            
+            <form id="login-form" onsubmit="realizarLogin(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">E-mail</label>
+                        <input type="email" id="login-email" required class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 focus:outline-none focus:border-black dark:focus:border-white transition-colors" placeholder="seu@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Senha</label>
+                        <input type="password" id="login-senha" required class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 focus:outline-none focus:border-black dark:focus:border-white transition-colors" placeholder="••••••">
+                    </div>
+                    <p id="login-erro" class="text-red-500 text-sm hidden text-center">Credenciais inválidas.</p>
+                    <button type="submit" class="w-full bg-black dark:bg-white text-white dark:text-black font-medium py-4 rounded-2xl mt-6 hover:opacity-90 transition-opacity">
+                        ENTRAR
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="app-container" class="hidden">
+        <header class="apple-header sticky top-0 z-50 border-b border-zinc-200 dark:border-zinc-800">
+            <div class="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-black dark:bg-white text-white dark:text-black rounded-2xl flex items-center justify-center text-2xl font-bold"></div>
+                    <h1 class="text-2xl font-semibold tracking-tight">Gestão de Insumos</h1>
+                    <span id="badge-ia-ativa" class="text-sm font-medium text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded-3xl">IA Ativa</span>
+                </div>
+                
+                <nav class="flex items-center gap-8 text-sm font-medium">
+                    <a onclick="showSection('dashboard')" class="cursor-pointer hover:opacity-70 flex items-center gap-1">
+                        <i class="fa-solid fa-gauge-high"></i> <span>Dashboard</span>
+                    </a>
+                    <a id="nav-cadastrar" onclick="showSection('cadastrar')" class="cursor-pointer hover:opacity-70 flex items-center gap-1">
+                        <i class="fa-solid fa-plus"></i> <span>Cadastrar</span>
+                    </a>
+                    <a id="nav-editar" onclick="showSection('editar')" class="cursor-pointer hover:opacity-70 flex items-center gap-1">
+                        <i class="fa-solid fa-pen"></i> <span>Editar</span>
+                    </a>
+                    <a onclick="showSection('estoque')" class="cursor-pointer hover:opacity-70 flex items-center gap-1">
+                        <i class="fa-solid fa-boxes-stacked"></i> <span>Ver Estoque</span>
+                    </a>
+                    <a id="nav-mercadorias" onclick="showSection('mercadorias')" class="hidden cursor-pointer hover:opacity-70 flex items-center gap-1">
+                        <i class="fa-solid fa-truck-ramp-box"></i> <span>Mercadorias</span>
+                    </a>
+                    <a id="nav-registrar-chegada" onclick="showSection('registrar-chegada')" class="hidden cursor-pointer hover:opacity-70 flex items-center gap-1">
+                        <i class="fa-solid fa-truck-ramp-box"></i> <span>Registrar Chegada</span>
+                    </a>
+                    <a id="nav-relatorio" onclick="showSection('relatorio')" class="hidden cursor-pointer hover:opacity-70 flex items-center gap-1">
+                        <i class="fa-solid fa-chart-bar"></i> <span>Relatório Semanal</span>
+                    </a>
+                    <a id="nav-ia" onclick="showSection('ia')" class="cursor-pointer bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-3xl hover:opacity-90 transition-opacity flex items-center gap-1">
+                        <i class="fa-solid fa-robot"></i> <span>Assistente IA</span>
+                    </a>
+                </nav>
+
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleDarkMode()" class="text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors text-lg">
+                        <i class="fa-solid fa-circle-half-stroke"></i>
+                    </button>
+                    
+                    <div class="relative" id="notif-wrapper">
+                        <button onclick="toggleNotifPanel()" class="relative flex items-center gap-2 text-sm cursor-pointer focus:outline-none">
+                            <i class="fa-solid fa-bell text-amber-500 text-lg"></i>
+                            <span id="notif-count" class="hidden bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center absolute -top-2 -right-2">0</span>
+                        </button>
+                        <!-- Painel de notificações -->
+                        <div id="notif-panel" class="hidden absolute right-0 mt-3 w-80 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-xl z-50 overflow-hidden">
+                            <div class="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+                                <h4 class="font-semibold text-sm">Notificações</h4>
+                                <button onclick="limparNotificacoes()" class="text-xs text-zinc-400 hover:text-red-500 transition-colors">Limpar tudo</button>
+                            </div>
+                            <div id="notif-lista" class="max-h-72 overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800">
+                                <p class="text-zinc-400 text-xs text-center py-6">Nenhuma notificação.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 border-l border-zinc-300 dark:border-zinc-700 pl-4 ml-2">
+                        <div class="text-right">
+                            <div id="user-display-name" class="text-sm font-medium">Usuário</div>
+                            <button onclick="fazerLogout()" class="text-xs text-red-500 hover:underline">Sair</button>
+                        </div>
+                        <div class="w-8 h-8 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-black rounded-2xl flex items-center justify-center text-lg">👤</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-8 py-8">
+
+            <div id="section-dashboard" class="section">
+                <div class="mb-10">
+                    <h2 id="greeting-title" class="text-3xl font-semibold tracking-tight">Olá! 👋</h2>
+                    <p class="text-sm text-zinc-400 dark:text-zinc-500 mt-1">Aqui está o resumo do seu estoque hoje.</p>
+                </div>
+
+                <div class="grid grid-cols-5 gap-5">
+                    <!-- Card: Valor Total -->
+                    <div id="card-total-valor" class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 card-hover flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-wallet text-xl text-emerald-600 dark:text-emerald-400"></i>
+                        </div>
+                        <p class="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Valor em Estoque</p>
+                        <p id="total-valor" class="text-3xl font-semibold text-zinc-900 dark:text-white mt-1">R$ 0</p>
+                        <span class="mt-4 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-trend-up text-[10px]"></i> Valorização ativa
+                        </span>
+                    </div>
+
+                    <!-- Card: Alertas -->
+                    <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-red-100 dark:border-red-900/40 card-hover flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-900/40 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-triangle-exclamation text-xl text-red-500"></i>
+                        </div>
+                        <p class="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Itens em Alerta</p>
+                        <p id="alerta-count" class="text-3xl font-semibold text-red-600 mt-1">0</p>
+                        <button id="btn-resolver-ia" onclick="showSection('ia')" class="mt-4 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-4 py-1.5 rounded-full flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                            <i class="fa-solid fa-robot text-[10px]"></i> Resolver agora
+                        </button>
+                        <button id="btn-informar-gerente" onclick="informarGerente()" class="hidden mt-3 text-xs font-medium bg-zinc-900 dark:bg-white text-white dark:text-black px-4 py-1.5 rounded-full flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                            <i class="fa-solid fa-bell text-[10px]"></i> Informar ao gerente
+                        </button>
+                        <div id="msg-gerente-informado" class="hidden mt-3 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2 rounded-full flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check"></i> Gerente foi informado!
+                        </div>
+                    </div>
+
+                    <!-- Card: Vendas Hoje (R$) - só Gerente -->
+                    <div id="card-vendas-hoje" class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 card-hover flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-credit-card text-xl text-blue-500"></i>
+                        </div>
+                        <p class="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Vendas Hoje</p>
+                        <p id="vendas-hoje" class="text-3xl font-semibold text-zinc-900 dark:text-white mt-1">R$ 0</p>
+                        <span class="mt-4 text-xs text-zinc-400 dark:text-zinc-500">Métodos processados</span>
+                    </div>
+
+                    <!-- Card: Itens Vendidos + Nº Transações - só Gerente -->
+                    <div id="card-gerente-vendas-detalhe" class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 card-hover flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-bag-shopping text-xl text-indigo-500"></i>
+                        </div>
+                        <p class="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Itens Vendidos Hoje</p>
+                        <p id="dash-itens-vendidos" class="text-3xl font-semibold text-zinc-900 dark:text-white mt-1">0 <span class="text-base font-normal text-zinc-400">un.</span></p>
+                        <span id="dash-num-transacoes-gerente" class="mt-4 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full">0 transações</span>
+                    </div>
+
+                    <!-- Card: Vendas Hoje (Qtd) - só Vendedor -->
+                    <div id="card-vendas-qtd" class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 card-hover flex flex-col items-center text-center hidden">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-box-open text-xl text-blue-500"></i>
+                        </div>
+                        <p class="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Vendas Hoje</p>
+                        <p id="vendas-hoje-qtd" class="text-3xl font-semibold text-zinc-900 dark:text-white mt-1">0</p>
+                        <span id="dash-num-transacoes-vendedor" class="mt-4 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">0 transações</span>
+                    </div>
+
+                    <!-- Card: Total de Aparelhos -->
+                    <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 card-hover flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-boxes-stacked text-xl text-violet-500"></i>
+                        </div>
+                        <p class="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Total de Aparelhos</p>
+                        <p id="total-qtd-estoque" class="text-3xl font-semibold text-zinc-900 dark:text-white mt-1">0</p>
+                        <span class="mt-4 text-xs text-emerald-600 dark:text-emerald-400">Estoque físico atual</span>
+                    </div>
+                </div>
+
+                <div class="mt-12">
+                    <h3 class="font-medium mb-5 flex items-center gap-2 text-zinc-700 dark:text-zinc-300">
+                        <i class="fa-solid fa-chart-line text-zinc-400"></i> Produtos no sistema
+                    </h3>
+                    <div id="destaque-vendas" class="grid grid-cols-5 gap-4"></div>
+                </div>
+            </div>
+
+            <div id="section-cadastrar" class="section hidden">
+                <h2 class="text-3xl font-semibold mb-8">Cadastrar Novo Produto</h2>
+                <div class="max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl p-8 shadow-sm border border-zinc-100 dark:border-zinc-800">
+                    <form onsubmit="cadastrarProduto(event)">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm mb-2 font-medium">Tipo de Produto</label>
+                                <select id="tipo" class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-4 focus:outline-none focus:border-black dark:focus:border-white">
+                                    <option value="iPhone">📱 iPhone</option>
+                                    <option value="MacBook">💻 MacBook</option>
+                                    <option value="iPad">📱 iPad</option>
+                                    <option value="Apple Watch">⌚ Apple Watch</option>
+                                    <option value="AirPods">🎧 AirPods</option>
+                                    <option value="iMac">🖥 iMac</option>
+                                    <option value="Mac mini / Mac Studio">🖥 Mac mini / Mac Studio</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2 font-medium">Modelo</label>
+                                <select id="modelo" class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-4 focus:outline-none focus:border-black dark:focus:border-white" required>
+                                    <option value="">Selecione um modelo...</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <div>
+                                <label class="block text-sm mb-2 font-medium">Valor Unitário Venda (R$)</label>
+                                <input id="valor" type="number" step="0.01" min="0" placeholder="Ex: 8500.00" class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-4 focus:outline-none focus:border-black dark:focus:border-white" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="mt-10 w-full bg-black dark:bg-white text-white dark:text-black py-5 rounded-3xl font-medium text-lg flex items-center justify-center gap-3 hover:opacity-90 transition-opacity">
+                            <i class="fa-solid fa-plus"></i>
+                            CADASTRAR PRODUTO
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="section-editar" class="section hidden">
+                <h2 class="text-3xl font-semibold mb-8">Editar ou Excluir Produtos</h2>
+                <div id="lista-editar" class="grid grid-cols-3 gap-6"></div>
+            </div>
+
+            <div id="section-estoque" class="section hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-semibold">Estoque Atual</h2>
+                    <input id="busca" type="text" placeholder="🔎 Buscar por modelo..." 
+                           onkeyup="filtrarEstoque()" class="rounded-3xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-6 py-4 w-80 focus:outline-none focus:border-black dark:focus:border-white">
+                </div>
+                <div id="grid-estoque" class="grid grid-cols-4 gap-6"></div>
+            </div>
+
+            <div id="section-ia" class="section hidden">
+                <h2 class="text-3xl font-semibold mb-6">Assistente Inteligente</h2>
+
+                <!-- Sub-abas da IA -->
+                <div class="flex gap-2 mb-8 border-b border-zinc-200 dark:border-zinc-800">
+                    <button id="sub-aba-analise" onclick="trocarSubAbaIA('analise')"
+                        class="sub-aba-ia px-6 py-3 text-sm font-medium rounded-t-2xl border-b-2 border-black dark:border-white text-black dark:text-white transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-robot"></i> Análise & Chatbot
+                    </button>
+                    <button id="sub-aba-balanco" onclick="trocarSubAbaIA('balanco')"
+                        class="sub-aba-ia px-6 py-3 text-sm font-medium rounded-t-2xl border-b-2 border-transparent text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-scale-balanced"></i> Balanço de Insumos
+                    </button>
+                    <button id="sub-aba-vendas" onclick="trocarSubAbaIA('vendas')"
+                        class="sub-aba-ia px-6 py-3 text-sm font-medium rounded-t-2xl border-b-2 border-transparent text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-bag-shopping"></i> Vendas
+                    </button>
+                </div>
+
+                <!-- Conteúdo: Análise & Chatbot -->
+                <div id="sub-content-analise">
+                    <div class="flex gap-8">
+                        <div class="flex-1">
+                            <button onclick="analisarEstoqueIA()" 
+                                    class="mb-8 px-8 py-4 bg-gradient-to-r from-black to-zinc-800 dark:from-white dark:to-zinc-200 text-white dark:text-black rounded-3xl font-medium flex items-center gap-3 text-lg hover:opacity-90">
+                                <i class="fa-solid fa-robot animate-pulse"></i>
+                                GERAR ANÁLISE DO ESTOQUE
+                            </button>
+                            
+                            <div id="resultado-ia" class="bg-white dark:bg-zinc-900 rounded-3xl p-8 shadow-sm border border-zinc-100 dark:border-zinc-800 hidden">
+                                <h3 class="font-medium text-lg mb-6">📊 Status de Alertas</h3>
+                                <div id="alertas-ia" class="space-y-8"></div>
+                            </div>
+                        </div>
+
+                        <div class="w-96 bg-white dark:bg-zinc-900 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col h-[620px]">
+                            <div class="px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-3">
+                                <div class="w-8 h-8 bg-emerald-500 text-white rounded-2xl flex items-center justify-center">🤖</div>
+                                <div>
+                                    <p class="font-medium">Assistente de Estoque</p>
+                                    <p class="text-xs text-emerald-600 dark:text-emerald-400">Online • Integrado</p>
+                                </div>
+                            </div>
+                            
+                            <div id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-6 text-sm">
+                                </div>
+                            
+                            <div class="p-4 border-t border-zinc-200 dark:border-zinc-800">
+                                <div class="flex gap-2">
+                                    <input id="chat-input" type="text" placeholder="Sua mensagem..." 
+                                           class="flex-1 rounded-3xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-6 py-3 focus:outline-none focus:border-black dark:focus:border-white">
+                                    <button onclick="enviarRespostaChat()" class="bg-black dark:bg-white text-white dark:text-black w-12 h-12 rounded-3xl flex items-center justify-center hover:opacity-80">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conteúdo: Balanço de Insumos -->
+                <div id="sub-content-balanco" class="hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-sm text-zinc-500 dark:text-zinc-400">Resumo consolidado de todos os insumos cadastrados pelo vendedor.</p>
+                        </div>
+                        <button onclick="renderBalancoInsumos()" class="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-3xl text-sm font-medium flex items-center gap-2 hover:opacity-90 transition-opacity">
+                            <i class="fa-solid fa-arrows-rotate"></i> Atualizar Balanço
+                        </button>
+                    </div>
+
+                    <!-- Cards de resumo -->
+                    <div class="grid grid-cols-4 gap-5 mb-8">
+                        <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-center text-center">
+                            <div class="w-11 h-11 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center mb-3">
+                                <i class="fa-solid fa-boxes-stacked text-indigo-500 text-lg"></i>
+                            </div>
+                            <p class="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">Total de Insumos</p>
+                            <p id="bal-total-produtos" class="text-3xl font-semibold text-zinc-900 dark:text-white">—</p>
+                            <p class="text-xs text-zinc-400 mt-1">produtos distintos</p>
+                        </div>
+                        <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-center text-center">
+                            <div class="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mb-3">
+                                <i class="fa-solid fa-truck-ramp-box text-emerald-500 text-lg"></i>
+                            </div>
+                            <p class="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">Unidades Recebidas</p>
+                            <p id="bal-total-unidades" class="text-3xl font-semibold text-zinc-900 dark:text-white">—</p>
+                            <p class="text-xs text-zinc-400 mt-1">via registros do vendedor</p>
+                        </div>
+                        <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-center text-center">
+                            <div class="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mb-3">
+                                <i class="fa-solid fa-wallet text-emerald-600 text-lg"></i>
+                            </div>
+                            <p class="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">Valor Total em Estoque</p>
+                            <p id="bal-valor-total" class="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">—</p>
+                            <p class="text-xs text-zinc-400 mt-1">soma de todos os produtos</p>
+                        </div>
+                        <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-center text-center">
+                            <div class="w-11 h-11 rounded-2xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center mb-3">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-lg"></i>
+                            </div>
+                            <p class="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">Itens em Alerta</p>
+                            <p id="bal-itens-alerta" class="text-3xl font-semibold text-amber-600 dark:text-amber-400">—</p>
+                            <p class="text-xs text-zinc-400 mt-1">estoque ≤ 5 unidades</p>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de insumos cadastrados -->
+                    <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden mb-8">
+                        <div class="px-6 py-5 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+                            <h3 class="font-semibold flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-zinc-400"></i> Insumos Cadastrados pelo Vendedor
+                            </h3>
+                            <span id="bal-data-atualizacao" class="text-xs text-zinc-400"></span>
+                        </div>
+                        <div id="bal-tabela" class="divide-y divide-zinc-100 dark:divide-zinc-800">
+                            <p class="text-zinc-400 text-sm text-center py-10">Clique em "Atualizar Balanço" para carregar.</p>
+                        </div>
+                    </div>
+
+                    <!-- Últimas chegadas registradas pelo vendedor -->
+                    <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden">
+                        <div class="px-6 py-5 border-b border-zinc-100 dark:border-zinc-800">
+                            <h3 class="font-semibold flex items-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left text-zinc-400"></i> Últimas Chegadas Registradas
+                            </h3>
+                        </div>
+                        <div id="bal-chegadas" class="divide-y divide-zinc-100 dark:divide-zinc-800">
+                            <p class="text-zinc-400 text-sm text-center py-8">Nenhuma chegada ainda.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conteúdo: Vendas -->
+                <div id="sub-content-vendas" class="hidden">
+
+                    <!-- Formulário de registro -->
+                    <div class="grid grid-cols-3 gap-8 mb-8">
+                        <div class="col-span-1 bg-white dark:bg-zinc-900 rounded-3xl p-7 shadow-sm border border-zinc-100 dark:border-zinc-800">
+                            <h3 class="font-semibold mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-plus text-zinc-400"></i> Registrar Venda
+                            </h3>
+                            <p class="text-xs text-zinc-400 mb-5">Informado pelo Subgerente • valor calculado pela IA</p>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-zinc-500 uppercase tracking-widest mb-2">Produto</label>
+                                    <select id="venda-produto" onchange="calcularPreviewVenda()" class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-black dark:focus:border-white">
+                                        <option value="">Selecione o produto...</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-zinc-500 uppercase tracking-widest mb-2">Quantidade Vendida</label>
+                                    <input id="venda-quantidade" type="number" min="1" placeholder="Ex: 3" oninput="calcularPreviewVenda()"
+                                        class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-black dark:focus:border-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-zinc-500 uppercase tracking-widest mb-2">Nº de Transações</label>
+                                    <input id="venda-num-transacoes" type="number" min="1" placeholder="Ex: 2" oninput="calcularPreviewVenda()"
+                                        class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-black dark:focus:border-white">
+                                </div>
+
+                                <!-- Preview calculado pela IA -->
+                                <div id="venda-preview" class="hidden bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i class="fa-solid fa-robot text-emerald-600 text-xs"></i>
+                                        <p class="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Cálculo da IA</p>
+                                    </div>
+                                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Preço unitário cadastrado: <span id="preview-preco-unit" class="font-semibold text-zinc-700 dark:text-zinc-200">—</span></p>
+                                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Ticket médio por transação: <span id="preview-ticket" class="font-semibold text-zinc-700 dark:text-zinc-200">—</span></p>
+                                    <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300 mt-2">Total estimado: <span id="preview-total">—</span></p>
+                                </div>
+
+                                <p id="venda-erro" class="hidden text-red-500 text-xs text-center">Preencha todos os campos corretamente.</p>
+                                <p id="venda-erro-estoque" class="hidden text-amber-500 text-xs text-center">Quantidade maior que o estoque disponível.</p>
+                                <button onclick="registrarVenda()"
+                                    class="w-full mt-2 bg-black dark:bg-white text-white dark:text-black py-4 rounded-2xl font-medium text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+                                    <i class="fa-solid fa-bag-shopping"></i> REGISTRAR VENDA
+                                </button>
+                                <div id="venda-sucesso" class="hidden text-center text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-3 rounded-2xl text-xs font-medium flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-circle-check"></i> Venda registrada com sucesso!
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cards de resumo -->
+                        <div class="col-span-2 grid grid-cols-3 gap-5 content-start">
+                            <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-center text-center">
+                                <div class="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mb-3">
+                                    <i class="fa-solid fa-sack-dollar text-emerald-600 text-lg"></i>
+                                </div>
+                                <p class="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">Total Recebido</p>
+                                <p id="venda-resumo-valor" class="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">R$ 0</p>
+                                <p class="text-xs text-zinc-400 mt-1">todas as vendas</p>
+                            </div>
+                            <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-center text-center">
+                                <div class="w-11 h-11 rounded-2xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center mb-3">
+                                    <i class="fa-solid fa-bag-shopping text-blue-500 text-lg"></i>
+                                </div>
+                                <p class="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">Unidades Vendidas</p>
+                                <p id="venda-resumo-qtd" class="text-3xl font-semibold text-zinc-900 dark:text-white">0</p>
+                                <p class="text-xs text-zinc-400 mt-1">no total</p>
+                            </div>
+                            <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-center text-center">
+                                <div class="w-11 h-11 rounded-2xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center mb-3">
+                                    <i class="fa-solid fa-receipt text-violet-500 text-lg"></i>
+                                </div>
+                                <p class="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">Nº de Vendas</p>
+                                <p id="venda-resumo-count" class="text-3xl font-semibold text-zinc-900 dark:text-white">0</p>
+                                <p class="text-xs text-zinc-400 mt-1">transações</p>
+                            </div>
+
+                            <!-- Produto mais vendido -->
+                            <div class="col-span-3 bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 flex items-center gap-5">
+                                <div class="w-11 h-11 rounded-2xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-trophy text-amber-500 text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">Produto Mais Vendido</p>
+                                    <p id="venda-top-produto" class="text-lg font-semibold text-zinc-900 dark:text-white">—</p>
+                                </div>
+                                <div class="ml-auto text-right">
+                                    <p class="text-xs text-zinc-400 uppercase tracking-widest mb-1">Ticket Médio</p>
+                                    <p id="venda-ticket-medio" class="text-lg font-semibold text-zinc-900 dark:text-white">—</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Histórico de vendas -->
+                    <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden">
+                        <div class="px-6 py-5 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+                            <h3 class="font-semibold flex items-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left text-zinc-400"></i> Histórico de Vendas
+                            </h3>
+                            <button onclick="if(confirm('Limpar todo o histórico de vendas?')) limparVendas()"
+                                class="text-xs text-zinc-400 hover:text-red-500 transition-colors">Limpar histórico</button>
+                        </div>
+                        <div id="venda-historico" class="divide-y divide-zinc-100 dark:divide-zinc-800">
+                            <p class="text-zinc-400 text-sm text-center py-10">Nenhuma venda registrada ainda.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-mercadorias" class="section hidden">
+                <div class="mb-10">
+                    <h2 class="text-3xl font-semibold tracking-tight">Chegada de Mercadorias</h2>
+                    <p class="text-sm text-zinc-400 dark:text-zinc-500 mt-1">Visualize as entregas registradas pelo sistema.</p>
+                </div>
+
+                <!-- Histórico de Chegadas (somente leitura) -->
+                <div>
+                    <div id="lista-mercadorias" class="space-y-4">
+                        <p class="text-zinc-400 dark:text-zinc-600 text-sm text-center py-10">Nenhuma chegada registrada ainda.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-relatorio" class="section hidden">
+                <div class="mb-10 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-3xl font-semibold tracking-tight">Relatório Semanal</h2>
+                        <p class="text-sm text-zinc-400 dark:text-zinc-500 mt-1">Resumo dos últimos 7 dias de movimentação.</p>
+                    </div>
+                    <div id="relatorio-periodo" class="text-sm text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-4 py-2 rounded-2xl"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-5 mb-10">
+                    <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 flex items-center gap-5">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-truck-ramp-box text-indigo-500 text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">Mercadorias Recebidas</p>
+                            <p id="rel-total-chegadas" class="text-3xl font-semibold text-zinc-900 dark:text-white">0</p>
+                            <p class="text-xs text-zinc-400 mt-0.5">registros na semana</p>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 flex items-center gap-5">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-box-open text-emerald-500 text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">Unidades Recebidas</p>
+                            <p id="rel-total-unidades" class="text-3xl font-semibold text-zinc-900 dark:text-white">0</p>
+                            <p class="text-xs text-zinc-400 mt-0.5">unidades no total</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 mb-8 overflow-hidden">
+                    <div class="px-6 py-5 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
+                        <i class="fa-solid fa-truck-ramp-box text-indigo-500"></i>
+                        <h3 class="font-semibold">Mercadorias que Chegaram</h3>
+                    </div>
+                    <div id="rel-lista-chegadas" class="divide-y divide-zinc-100 dark:divide-zinc-800">
+                        <p class="text-zinc-400 text-sm text-center py-8">Nenhuma chegada nesta semana.</p>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden">
+                    <div class="px-6 py-5 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-stacked text-emerald-500"></i>
+                        <h3 class="font-semibold">Resumo por Produto</h3>
+                    </div>
+                    <div id="rel-resumo-produtos" class="divide-y divide-zinc-100 dark:divide-zinc-800">
+                        <p class="text-zinc-400 text-sm text-center py-8">Sem dados disponíveis.</p>
+                    </div>
+                </div>
+
+                <!-- Botão enviar relatório -->
+                <div class="mt-8 flex items-center gap-4">
+                    <button onclick="enviarRelatorioGerente()" id="btn-enviar-relatorio"
+                        class="px-8 py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-medium flex items-center gap-2 hover:opacity-90 transition-opacity">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar Relatório ao Gerente
+                    </button>
+                    <div id="msg-relatorio-enviado" class="hidden text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-3 rounded-2xl flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i> Relatório enviado ao gerente!
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-registrar-chegada" class="section hidden">
+                <div class="mb-10">
+                    <h2 class="text-3xl font-semibold tracking-tight">Registrar Chegada</h2>
+                    <p class="text-sm text-zinc-400 dark:text-zinc-500 mt-1">Informe os dados da mercadoria que chegou.</p>
+                </div>
+
+                <div class="max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl p-8 shadow-sm border border-zinc-100 dark:border-zinc-800">
+                    <h3 class="font-semibold text-lg mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-plus text-sm"></i> Nova Chegada
+                    </h3>
+                    <div class="grid grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-500 uppercase tracking-widest mb-2">Produto</label>
+                            <select id="reg-produto" class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 focus:outline-none focus:border-black dark:focus:border-white text-sm">
+                                <optgroup label="iPhone">
+                                    <option value="iPhone XR">iPhone XR</option>
+                                    <option value="iPhone XS">iPhone XS</option>
+                                    <option value="iPhone XS Max">iPhone XS Max</option>
+                                    <option value="iPhone 11">iPhone 11</option>
+                                    <option value="iPhone 11 Pro">iPhone 11 Pro</option>
+                                    <option value="iPhone 11 Pro Max">iPhone 11 Pro Max</option>
+                                    <option value="iPhone SE (2ª geração)">iPhone SE (2ª geração)</option>
+                                    <option value="iPhone 12">iPhone 12</option>
+                                    <option value="iPhone 12 mini">iPhone 12 mini</option>
+                                    <option value="iPhone 12 Pro">iPhone 12 Pro</option>
+                                    <option value="iPhone 12 Pro Max">iPhone 12 Pro Max</option>
+                                    <option value="iPhone 13">iPhone 13</option>
+                                    <option value="iPhone 13 mini">iPhone 13 mini</option>
+                                    <option value="iPhone 13 Pro">iPhone 13 Pro</option>
+                                    <option value="iPhone 13 Pro Max">iPhone 13 Pro Max</option>
+                                    <option value="iPhone SE (3ª geração)">iPhone SE (3ª geração)</option>
+                                    <option value="iPhone 14">iPhone 14</option>
+                                    <option value="iPhone 14 Plus">iPhone 14 Plus</option>
+                                    <option value="iPhone 14 Pro">iPhone 14 Pro</option>
+                                    <option value="iPhone 14 Pro Max">iPhone 14 Pro Max</option>
+                                    <option value="iPhone 15">iPhone 15</option>
+                                    <option value="iPhone 15 Plus">iPhone 15 Plus</option>
+                                    <option value="iPhone 15 Pro">iPhone 15 Pro</option>
+                                    <option value="iPhone 15 Pro Max">iPhone 15 Pro Max</option>
+                                    <option value="iPhone 16">iPhone 16</option>
+                                    <option value="iPhone 16 Plus">iPhone 16 Plus</option>
+                                    <option value="iPhone 16 Pro">iPhone 16 Pro</option>
+                                    <option value="iPhone 16 Pro Max">iPhone 16 Pro Max</option>
+                                    <option value="iPhone 17">iPhone 17</option>
+                                    <option value="iPhone Air">iPhone Air</option>
+                                    <option value="iPhone 17 Pro">iPhone 17 Pro</option>
+                                    <option value="iPhone 17 Pro Max">iPhone 17 Pro Max</option>
+                                    <option value="iPhone 17e">iPhone 17e</option>
+                                </optgroup>
+                                <optgroup label="MacBook">
+                                    <option value="MacBook Pro 15\" (2018)">MacBook Pro 15" (2018)</option>
+                                    <option value="MacBook Air (Retina, 2018)">MacBook Air (Retina, 2018)</option>
+                                    <option value="MacBook Pro 13\" (2018)">MacBook Pro 13" (2018)</option>
+                                    <option value="MacBook Air (Retina, 2019)">MacBook Air (Retina, 2019)</option>
+                                    <option value="MacBook Pro 16\" (2019)">MacBook Pro 16" (2019)</option>
+                                    <option value="MacBook Air M1">MacBook Air M1</option>
+                                    <option value="MacBook Pro 13\" M1">MacBook Pro 13" M1</option>
+                                    <option value="MacBook Pro 14\" M1 Pro/Max">MacBook Pro 14" M1 Pro/Max</option>
+                                    <option value="MacBook Pro 16\" M1 Pro/Max">MacBook Pro 16" M1 Pro/Max</option>
+                                    <option value="MacBook Air M2">MacBook Air M2</option>
+                                    <option value="MacBook Pro 13\" M2">MacBook Pro 13" M2</option>
+                                    <option value="MacBook Pro M3">MacBook Pro M3</option>
+                                    <option value="MacBook Air M3">MacBook Air M3</option>
+                                    <option value="MacBook Air M4">MacBook Air M4</option>
+                                    <option value="MacBook Air M5">MacBook Air M5</option>
+                                    <option value="MacBook Pro M5 Pro/Max">MacBook Pro M5 Pro/Max</option>
+                                </optgroup>
+                                <optgroup label="iPad">
+                                    <option value="iPad (6ª geração)">iPad (6ª geração)</option>
+                                    <option value="iPad Pro 12,9\" (3ª geração)">iPad Pro 12,9" (3ª geração)</option>
+                                    <option value="iPad (7ª geração)">iPad (7ª geração)</option>
+                                    <option value="iPad mini (5ª geração)">iPad mini (5ª geração)</option>
+                                    <option value="iPad Air (3ª geração)">iPad Air (3ª geração)</option>
+                                    <option value="iPad Pro 11\" (1ª geração)">iPad Pro 11" (1ª geração)</option>
+                                    <option value="iPad (8ª geração)">iPad (8ª geração)</option>
+                                    <option value="iPad Air (4ª geração)">iPad Air (4ª geração)</option>
+                                    <option value="iPad Pro (2020)">iPad Pro (2020)</option>
+                                    <option value="iPad (9ª geração)">iPad (9ª geração)</option>
+                                    <option value="iPad mini (6ª geração)">iPad mini (6ª geração)</option>
+                                    <option value="iPad Pro M1">iPad Pro M1</option>
+                                    <option value="iPad (10ª geração)">iPad (10ª geração)</option>
+                                    <option value="iPad Air (5ª geração)">iPad Air (5ª geração)</option>
+                                    <option value="iPad Pro M2">iPad Pro M2</option>
+                                    <option value="iPad mini (7ª geração)">iPad mini (7ª geração)</option>
+                                    <option value="iPad Pro M4">iPad Pro M4</option>
+                                    <option value="iPad Air M2">iPad Air M2</option>
+                                    <option value="iPad Air M4">iPad Air M4</option>
+                                </optgroup>
+                                <optgroup label="Apple Watch">
+                                    <option value="Apple Watch Series 4">Apple Watch Series 4</option>
+                                    <option value="Apple Watch Series 5">Apple Watch Series 5</option>
+                                    <option value="Apple Watch SE (1ª geração)">Apple Watch SE (1ª geração)</option>
+                                    <option value="Apple Watch Series 6">Apple Watch Series 6</option>
+                                    <option value="Apple Watch Series 7">Apple Watch Series 7</option>
+                                    <option value="Apple Watch SE (2ª geração)">Apple Watch SE (2ª geração)</option>
+                                    <option value="Apple Watch Series 8">Apple Watch Series 8</option>
+                                    <option value="Apple Watch Ultra">Apple Watch Ultra</option>
+                                    <option value="Apple Watch Series 9">Apple Watch Series 9</option>
+                                    <option value="Apple Watch Ultra 2">Apple Watch Ultra 2</option>
+                                    <option value="Apple Watch Series 10">Apple Watch Series 10</option>
+                                    <option value="Apple Watch Series 11">Apple Watch Series 11</option>
+                                    <option value="Apple Watch Ultra 3">Apple Watch Ultra 3</option>
+                                    <option value="Apple Watch SE (3ª geração)">Apple Watch SE (3ª geração)</option>
+                                </optgroup>
+                                <optgroup label="AirPods">
+                                    <option value="AirPods (2ª geração)">AirPods (2ª geração)</option>
+                                    <option value="AirPods Pro (1ª geração)">AirPods Pro (1ª geração)</option>
+                                    <option value="AirPods Max">AirPods Max</option>
+                                    <option value="AirPods (3ª geração)">AirPods (3ª geração)</option>
+                                    <option value="AirPods Pro (2ª geração)">AirPods Pro (2ª geração)</option>
+                                    <option value="AirPods 4">AirPods 4</option>
+                                    <option value="AirPods 4 (ANC)">AirPods 4 (ANC)</option>
+                                    <option value="AirPods Pro 3">AirPods Pro 3</option>
+                                </optgroup>
+                                <optgroup label="iMac">
+                                    <option value="iMac 24\" M1">iMac 24" M1</option>
+                                    <option value="iMac M3">iMac M3</option>
+                                </optgroup>
+                                <optgroup label="Mac mini / Mac Studio">
+                                    <option value="Mac mini (2018)">Mac mini (2018)</option>
+                                    <option value="Mac mini M1">Mac mini M1</option>
+                                    <option value="Mac Studio M1 Max/Ultra">Mac Studio M1 Max/Ultra</option>
+                                    <option value="Mac mini M2">Mac mini M2</option>
+                                    <option value="Mac mini M4">Mac mini M4</option>
+                                    <option value="Mac Studio M4 Max">Mac Studio M4 Max</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-500 uppercase tracking-widest mb-2">Transportadora</label>
+                            <input id="reg-fornecedor" type="text" placeholder="Ex: Correios, Loggi, Jadlog..." class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 focus:outline-none focus:border-black dark:focus:border-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-500 uppercase tracking-widest mb-2">Volume (unidades)</label>
+                            <input id="reg-quantidade" type="number" min="1" placeholder="Ex: 20" class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 focus:outline-none focus:border-black dark:focus:border-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-500 uppercase tracking-widest mb-2">Data e Horário de Chegada</label>
+                            <input id="reg-horario" type="datetime-local" class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 focus:outline-none focus:border-black dark:focus:border-white text-sm">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-medium text-zinc-500 uppercase tracking-widest mb-2">Data de Vencimento da Entrega</label>
+                            <input id="reg-vencimento" type="date" class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 focus:outline-none focus:border-black dark:focus:border-white text-sm">
+                        </div>
+                    </div>
+                    <button onclick="vendedorRegistrarChegada()" class="mt-8 w-full bg-black dark:bg-white text-white dark:text-black py-4 rounded-2xl font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+                        <i class="fa-solid fa-truck-ramp-box"></i> REGISTRAR CHEGADA
+                    </button>
+                    <p id="reg-erro" class="hidden text-center text-red-500 text-sm mt-3">Preencha todos os campos antes de registrar.</p>
+                    <div id="reg-sucesso" class="hidden mt-4 text-center text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-3 rounded-2xl flex items-center justify-center gap-2 text-sm font-medium">
+                        <i class="fa-solid fa-circle-check"></i> Chegada registrada com sucesso!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div onclick="if(event.target.id === 'modal-notif')hideModal()" id="modal-notif" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] backdrop-blur-sm">
+        <div onclick="event.stopImmediatePropagation()" class="modal bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded-3xl max-w-lg w-full mx-4 p-8 border border-zinc-200 dark:border-zinc-800">
+            <h3 class="text-2xl font-semibold mb-4">Notificação</h3>
+            <div id="modal-conteudo" class="text-zinc-600 dark:text-zinc-400"></div>
+            <button onclick="hideModal()" class="mt-8 w-full py-4 bg-black dark:bg-white text-white dark:text-black font-medium rounded-3xl">FECHAR</button>
+        </div>
+    </div>
+        <!-- MODAL PRODUTO - OVERLAY COMPLETO (NOVO) -->
+    <div id="modal-produto">
+        <div class="modal-conteudo">
+            <!-- Header -->
+            <div class="header-modal flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img id="modal-img" src="" class="w-16 h-16 object-contain rounded-2xl shadow-lg" alt="">
+                    <div>
+                        <h2 id="modal-titulo" class="text-2xl font-semibold tracking-tight"></h2>
+                        <p id="modal-subtitulo" class="text-sm text-zinc-500 capitalize"></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <select id="periodo-modal" class="rounded-xl border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm bg-white dark:bg-zinc-800 focus:outline-none focus:border-indigo-500">
+                        <option value="7">7 dias</option>
+                        <option value="30" selected>30 dias</option>
+                        <option value="90">90 dias</option>
+                        <option value="365">1 ano</option>
+                    </select>
+                    <button onclick="fecharModalProduto()" class="w-10 h-10 rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 flex items-center justify-center text-zinc-500 hover:text-zinc-700 transition-all shadow-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Conteúdo -->
+            <div class="conteudo-modal">
+                <!-- Métricas -->
+                <div class="metricas-grid mb-8">
+                    <div class="card-metrica">
+                        <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg">
+                            <i class="fa-solid fa-sack-dollar text-white text-2xl"></i>
+                        </div>
+                        <p class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Total Faturado</p>
+                        <p id="total-faturado" class="text-3xl font-black bg-gradient-to-r from-zinc-900 to-zinc-800 bg-clip-text text-transparent dark:from-white dark:to-zinc-200">R$ 0,00</p>
+                    </div>
+                    <div class="card-metrica">
+                        <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                            <i class="fa-solid fa-boxes-stacked text-white text-2xl"></i>
+                        </div>
+                        <p class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Unidades Vendidas</p>
+                        <p id="total-vendidas" class="text-3xl font-black text-zinc-900 dark:text-white">0</p>
+                    </div>
+                    <div class="card-metrica">
+                        <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                            <i class="fa-solid fa-receipt text-white text-2xl"></i>
+                        </div>
+                        <p class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Ticket Médio</p>
+                        <p id="ticket-medio" class="text-3xl font-black text-zinc-900 dark:text-white">R$ 0</p>
+                    </div>
+                    <div class="card-metrica">
+                        <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 flex items-center justify-center shadow-lg">
+                            <i class="fa-solid fa-warehouse text-white text-2xl"></i>
+                        </div>
+                        <p class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Estoque Atual</p>
+                        <p id="estoque-restante" class="text-3xl font-black text-zinc-900 dark:text-white">0 un.</p>
+                    </div>
+                </div>
+                
+                <!-- Gráfico -->
+                <div class="grafico-container mb-8">
+                    <h3 class="font-bold text-xl mb-6 flex items-center gap-3 text-zinc-900 dark:text-white">
+                        <i class="fa-solid fa-chart-area text-indigo-600 text-2xl"></i>
+                        Evolução de Vendas
+                    </h3>
+                    <div style="height: 280px;">
+                        <canvas id="grafico-vendas"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Histórico -->
+                <div class="tabela-historico">
+                    <div class="px-6 py-5 border-b border-zinc-200 dark:border-zinc-700 bg-gradient-to-r from-zinc-50 to-zinc-100 dark:from-zinc-900/50 dark:to-zinc-800/50">
+                        <h3 class="font-bold text-lg flex items-center gap-3 text-zinc-900 dark:text-white">
+                            <i class="fa-solid fa-history text-amber-600"></i>
+                            Últimas Vendas
+                        </h3>
+                    </div>
+                    <div id="historico-vendas" class="max-h-72 overflow-y-auto">
+                        <div class="text-center py-16">
+                            <i class="fa-solid fa-clock-rotate-left text-4xl text-zinc-400 mb-4 opacity-50"></i>
+                            <p class="text-zinc-400 text-lg font-medium">Carregando histórico...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay para fechar painel de notificações -->
+    <div id="notif-overlay" class="hidden fixed inset-0 z-40" onclick="fecharNotifPanel()"></div>
+
+    <script>
+        // ==================== CONTROLE DE ACESSO (RBAC) ====================
+        const usuarios = {
+            "mateus.santos012@cs.cruzeirodosul.edu.br": { senha: "123", nome: "Vendedor", role: "Vendedor" },
+            "holiveira006@cs.unicid.edu.br": { senha: "123", nome: "Gerente", role: "Gerente" },
+            "cicero.unicid@cs.edu.br": { senha: "123", nome: "Subgerente", role: "Subgerente" }
+        };
+
+        let usuarioAtual = null;
+
+        function realizarLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const senha = document.getElementById('login-senha').value;
+            const erro = document.getElementById('login-erro');
+
+            if (usuarios[email] && usuarios[email].senha === senha) {
+                usuarioAtual = usuarios[email];
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                aplicarPermissoes();
+                initApp();
+            } else {
+                erro.classList.remove('hidden');
+            }
+        }
+
+        function fazerLogout() {
+            usuarioAtual = null;
+            document.getElementById('login-form').reset();
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('app-container').classList.add('hidden');
+        }
+
+        function aplicarPermissoes() {
+            // Header
+            document.getElementById('greeting-title').innerText = `Olá! ${usuarioAtual.nome}`;
+            document.getElementById('user-display-name').innerText = usuarioAtual.nome;
+
+            // Restrições Financeiras
+            if (usuarioAtual.role === 'Vendedor') {
+                document.getElementById('card-total-valor').classList.add('hidden');
+                document.getElementById('card-vendas-hoje').classList.add('hidden');
+                document.getElementById('card-gerente-vendas-detalhe').classList.add('hidden');
+                document.getElementById('card-vendas-qtd').classList.remove('hidden');
+
+                // Ocultar Editar para Vendedor
+                document.getElementById('nav-editar').classList.add('hidden');
+
+                // Mostrar Registrar Chegada para Vendedor
+                document.getElementById('nav-registrar-chegada').classList.remove('hidden');
+
+                // Mostrar botão de informar gerente para Vendedor
+                document.getElementById('btn-informar-gerente').classList.remove('hidden');
+
+                // Ocultar elementos de IA para Vendedor
+                document.getElementById('nav-ia').classList.add('hidden');
+                document.getElementById('badge-ia-ativa').classList.add('hidden');
+                document.getElementById('btn-resolver-ia').classList.add('hidden');
+
+            } else if (usuarioAtual.role === 'Subgerente') {
+                // Subgerente — ver estoque, mercadorias, relatório e dashboard de vendas
+                document.getElementById('card-total-valor').classList.remove('hidden');
+                document.getElementById('card-vendas-hoje').classList.remove('hidden');
+                document.getElementById('card-gerente-vendas-detalhe').classList.remove('hidden');
+                document.getElementById('card-vendas-qtd').classList.add('hidden');
+
+                document.getElementById('nav-cadastrar').classList.add('hidden');
+                document.getElementById('nav-editar').classList.add('hidden');
+                document.getElementById('nav-registrar-chegada').classList.add('hidden');
+                document.getElementById('nav-mercadorias').classList.remove('hidden');
+                document.getElementById('nav-relatorio').classList.remove('hidden');
+                document.getElementById('btn-informar-gerente').classList.add('hidden');
+
+                document.getElementById('nav-ia').classList.add('hidden');
+                document.getElementById('badge-ia-ativa').classList.add('hidden');
+                document.getElementById('btn-resolver-ia').classList.add('hidden');
+
+            } else {
+                // Gerente
+                document.getElementById('card-total-valor').classList.remove('hidden');
+                document.getElementById('card-vendas-hoje').classList.remove('hidden');
+                document.getElementById('card-gerente-vendas-detalhe').classList.remove('hidden');
+                document.getElementById('card-vendas-qtd').classList.add('hidden');
+
+                // Garantir que Editar esteja visível para Gerente
+                document.getElementById('nav-editar').classList.remove('hidden');
+
+                // Ocultar Cadastrar para Gerente
+                document.getElementById('nav-cadastrar').classList.add('hidden');
+
+                // Mostrar Mercadorias para Gerente
+                document.getElementById('nav-mercadorias').classList.remove('hidden');
+
+                // Garantir que elementos de IA estejam visíveis para Gerente
+                document.getElementById('nav-ia').classList.remove('hidden');
+                document.getElementById('badge-ia-ativa').classList.remove('hidden');
+                document.getElementById('btn-resolver-ia').classList.remove('hidden');
+
+                // Mensagem Inicial Chatbot Gerente
+                chatHistory = [{ tipo: "ia", msg: "Olá Gerente! Detectei o status do estoque. Posso fazer as estimativas de compra junto aos fornecedores." }];
+            }
+        }
+
+        // ==================== DARK MODE TOGGLE ====================
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        // ==================== DADOS (IMAGENS E ESTOQUE) ====================
+        // Dicionário de URLs mockadas para simular imagens reais dos iPhones
+        const imagensModelos = {
+            "iPhone 13": "https://cdn-icons-png.flaticon.com/512/0/566.png", // Usando ícones estéticos de placeholder para evitar links quebrados
+            "iPhone 14": "https://cdn-icons-png.flaticon.com/512/0/566.png",
+            "iPhone 15": "https://cdn-icons-png.flaticon.com/512/0/566.png",
+            "iPhone 16": "https://cdn-icons-png.flaticon.com/512/0/566.png",
+            "iPhone 16e": "https://cdn-icons-png.flaticon.com/512/0/566.png",
+            "iPhone 17": "https://cdn-icons-png.flaticon.com/512/0/566.png",
+            "iPhone Air": "https://cdn-icons-png.flaticon.com/512/0/566.png",
+            "iPhone 17 Pro": "https://cdn-icons-png.flaticon.com/512/0/566.png",
+            "iPhone 17 Pro Max": "https://cdn-icons-png.flaticon.com/512/0/566.png",
+            "MacBook M1": "https://cdn-icons-png.flaticon.com/512/3254/3254068.png",
+            "AirPods 4": "https://cdn-icons-png.flaticon.com/512/6245/6245107.png",
+            "default": "https://cdn-icons-png.flaticon.com/512/5906/5906059.png"
+        };
+
+        const PRODUCT_MODELS = {
+            "iPhone": [
+                "iPhone XR", "iPhone XS", "iPhone XS Max", "iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max",
+                "iPhone SE (2ª geração)", "iPhone 12", "iPhone 12 mini", "iPhone 12 Pro", "iPhone 12 Pro Max",
+                "iPhone 13", "iPhone 13 mini", "iPhone 13 Pro", "iPhone 13 Pro Max", "iPhone SE (3ª geração)",
+                "iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max", "iPhone 15", "iPhone 15 Plus",
+                "iPhone 15 Pro", "iPhone 15 Pro Max", "iPhone 16", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max",
+                "iPhone 17", "iPhone Air", "iPhone 17 Pro", "iPhone 17 Pro Max", "iPhone 17e"
+            ],
+            "MacBook": [
+                "MacBook Pro 15\" (2018)", "MacBook Air (Retina, 2018)", "MacBook Pro 13\" (2018)", "MacBook Air (Retina, 2019)",
+                "MacBook Pro 16\" (2019)", "MacBook Air M1", "MacBook Pro 13\" M1", "MacBook Pro 14\" M1 Pro/Max", "MacBook Pro 16\" M1 Pro/Max",
+                "MacBook Air M2", "MacBook Pro 13\" M2", "MacBook Pro M3", "MacBook Air M3", "MacBook Air M4", "MacBook Air M5",
+                "MacBook Pro M5 Pro/Max"
+            ],
+            "iPad": [
+                "iPad (6ª geração)", "iPad Pro 12,9\" (3ª geração)", "iPad (7ª geração)", "iPad mini (5ª geração)",
+                "iPad Air (3ª geração)", "iPad Pro 11\" (1ª geração)", "iPad (8ª geração)", "iPad Air (4ª geração)",
+                "iPad Pro (2020)", "iPad (9ª geração)", "iPad mini (6ª geração)", "iPad Pro M1", "iPad (10ª geração)",
+                "iPad Air (5ª geração)", "iPad Pro M2", "iPad mini (7ª geração)", "iPad Pro M4", "iPad Air M2", "iPad Air M4"
+            ],
+            "Apple Watch": [
+                "Apple Watch Series 4", "Apple Watch Series 5", "Apple Watch SE (1ª geração)", "Apple Watch Series 6", "Apple Watch Series 7",
+                "Apple Watch SE (2ª geração)", "Apple Watch Series 8", "Apple Watch Ultra", "Apple Watch Series 9", "Apple Watch Ultra 2",
+                "Apple Watch Series 10", "Apple Watch Series 11", "Apple Watch Ultra 3", "Apple Watch SE (3ª geração)"
+            ],
+            "AirPods": [
+                "AirPods (2ª geração)", "AirPods Pro (1ª geração)", "AirPods Max", "AirPods (3ª geração)",
+                "AirPods Pro (2ª geração)", "AirPods 4", "AirPods 4 (ANC)", "AirPods Pro 3"
+            ],
+            "iMac": [
+                "iMac 24\" M1", "iMac M3"
+            ],
+            "Mac mini / Mac Studio": [
+                "Mac mini (2018)", "Mac mini M1", "Mac Studio M1 Max/Ultra", "Mac mini M2", "Mac mini M4", "Mac Studio M4 Max"
+            ]
+        };
+
+        function populateModeloOptions(tipo) {
+            const modeloSelect = document.getElementById('modelo');
+            modeloSelect.innerHTML = '<option value="">Selecione um modelo...</option>';
+            const modelos = PRODUCT_MODELS[tipo] || [];
+            modelos.forEach((modelo) => {
+                const opt = document.createElement('option');
+                opt.value = modelo;
+                opt.textContent = modelo;
+                modeloSelect.appendChild(opt);
+            });
+        }
+
+        function getTipoByModelo(modelo) {
+            if (modelo.startsWith('iPhone')) return 'iPhone';
+            if (modelo.startsWith('MacBook')) return 'MacBook';
+            if (modelo.startsWith('iPad')) return 'iPad';
+            if (modelo.startsWith('Apple Watch')) return 'Apple Watch';
+            if (modelo.startsWith('AirPods')) return 'AirPods';
+            if (modelo.startsWith('iMac')) return 'iMac';
+            if (modelo.startsWith('Mac mini') || modelo.startsWith('Mac Studio')) return 'Mac mini / Mac Studio';
+            return 'iPhone';
+        }
+
+        let produtos = JSON.parse(localStorage.getItem('apple_produtos')) || [
+            {
+                id: 1, tipo: "iPhone", modelo: "iPhone 17 Pro Max", quantidade: 8, valor: 12999,
+                historicoVendas: [{ qty: 3 }, { qty: 5 }, { qty: 2 }]
+            },
+            {
+                id: 2, tipo: "MacBook", modelo: "MacBook M1", quantidade: 12, valor: 6999,
+                historicoVendas: [{ qty: 1 }, { qty: 2 }]
+            },
+            {
+                id: 3, tipo: "AirPods", modelo: "AirPods 4", quantidade: 3, valor: 899,
+                historicoVendas: [{ qty: 4 }, { qty: 6 }]
+            }
+        ];
+
+        let chatHistory = [];
+        // ==================== ESPECIFICAÇÕES TÉCNICAS COMPLETAS ====================
+const especificacoesTecnicas = {
+    // ==================== IPHONE ====================
+    "iPhone XR": { processador: "A12 Bionic", memoria: "3GB RAM", armazenamento: "64-256GB", tela: "6.1″ LCD", camera: "12MP + 7MP", bateria: "Até 15h" },
+    "iPhone XS": { processador: "A12 Bionic", memoria: "4GB RAM", armazenamento: "64-512GB", tela: "5.8″ OLED", camera: "12MP dupla + 7MP", bateria: "Até 14h" },
+    "iPhone XS Max": { processador: "A12 Bionic", memoria: "4GB RAM", armazenamento: "64-512GB", tela: "6.5″ OLED", camera: "12MP dupla + 7MP", bateria: "Até 15h" },
+    "iPhone 11": { processador: "A13 Bionic", memoria: "4GB RAM", armazenamento: "64-256GB", tela: "6.1″ LCD", camera: "12MP dupla + 12MP", bateria: "Até 17h" },
+    "iPhone 11 Pro": { processador: "A13 Bionic", memoria: "4GB RAM", armazenamento: "64-512GB", tela: "5.8″ OLED", camera: "12MP tripla + 12MP", bateria: "Até 18h" },
+    "iPhone 11 Pro Max": { processador: "A13 Bionic", memoria: "4GB RAM", armazenamento: "64-512GB", tela: "6.5″ OLED", camera: "12MP tripla + 12MP", bateria: "Até 20h" },
+    "iPhone SE (2ª geração)": { processador: "A13 Bionic", memoria: "3GB RAM", armazenamento: "64-256GB", tela: "4.7″ Retina", camera: "12MP + 7MP", bateria: "Até 13h" },
+    "iPhone 12": { processador: "A14 Bionic", memoria: "4GB RAM", armazenamento: "64-256GB", tela: "6.1″ OLED", camera: "12MP dupla + 12MP", bateria: "Até 17h" },
+    "iPhone 12 mini": { processador: "A14 Bionic", memoria: "4GB RAM", armazenamento: "64-256GB", tela: "5.4″ OLED", camera: "12MP dupla + 12MP", bateria: "Até 15h" },
+    "iPhone 12 Pro": { processador: "A14 Bionic", memoria: "6GB RAM", armazenamento: "128-512GB", tela: "6.1″ OLED", camera: "12MP tripla + LiDAR + 12MP", bateria: "Até 17h" },
+    "iPhone 12 Pro Max": { processador: "A14 Bionic", memoria: "6GB RAM", armazenamento: "128-512GB", tela: "6.7″ OLED", camera: "12MP tripla + LiDAR + 12MP", bateria: "Até 20h" },
+    "iPhone 13": { processador: "A15 Bionic", memoria: "4GB RAM", armazenamento: "128-512GB", tela: "6.1″ OLED 60Hz", camera: "12MP dupla + 12MP", bateria: "Até 19h" },
+    "iPhone 13 mini": { processador: "A15 Bionic", memoria: "4GB RAM", armazenamento: "128-512GB", tela: "5.4″ OLED 60Hz", camera: "12MP dupla + 12MP", bateria: "Até 17h" },
+    "iPhone 13 Pro": { processador: "A15 Bionic", memoria: "6GB RAM", armazenamento: "128-1TB", tela: "6.1″ OLED 120Hz ProMotion", camera: "12MP tripla + LiDAR + 12MP", bateria: "Até 22h" },
+    "iPhone 13 Pro Max": { processador: "A15 Bionic", memoria: "6GB RAM", armazenamento: "128-1TB", tela: "6.7″ OLED 120Hz ProMotion", camera: "12MP tripla + LiDAR + 12MP", bateria: "Até 28h" },
+    "iPhone SE (3ª geração)": { processador: "A15 Bionic", memoria: "4GB RAM", armazenamento: "64-256GB", tela: "4.7″ Retina", camera: "12MP + 7MP", bateria: "Até 15h" },
+    "iPhone 14": { processador: "A15 Bionic", memoria: "6GB RAM", armazenamento: "128-512GB", tela: "6.1″ OLED 60Hz", camera: "12MP dupla + 12MP", bateria: "Até 20h" },
+    "iPhone 14 Plus": { processador: "A15 Bionic", memoria: "6GB RAM", armazenamento: "128-512GB", tela: "6.7″ OLED 60Hz", camera: "12MP dupla + 12MP", bateria: "Até 26h" },
+    "iPhone 14 Pro": { processador: "A16 Bionic", memoria: "6GB RAM", armazenamento: "128-1TB", tela: "6.1″ OLED 120Hz ProMotion", camera: "48MP tripla + LiDAR + 12MP", bateria: "Até 23h" },
+    "iPhone 14 Pro Max": { processador: "A16 Bionic", memoria: "6GB RAM", armazenamento: "128-1TB", tela: "6.7″ OLED 120Hz ProMotion", camera: "48MP tripla + LiDAR + 12MP", bateria: "Até 29h" },
+    "iPhone 15": { processador: "A16 Bionic", memoria: "6GB RAM", armazenamento: "128-512GB", tela: "6.1″ OLED 60Hz", camera: "48MP dupla + 12MP", bateria: "Até 20h" },
+    "iPhone 15 Plus": { processador: "A16 Bionic", memoria: "6GB RAM", armazenamento: "128-512GB", tela: "6.7″ OLED 60Hz", camera: "48MP dupla + 12MP", bateria: "Até 26h" },
+    "iPhone 15 Pro": { processador: "A17 Pro", memoria: "8GB RAM", armazenamento: "128-1TB", tela: "6.1″ OLED 120Hz ProMotion", camera: "48MP tripla + LiDAR + 12MP", bateria: "Até 23h" },
+    "iPhone 15 Pro Max": { processador: "A17 Pro", memoria: "8GB RAM", armazenamento: "256-1TB", tela: "6.7″ OLED 120Hz ProMotion", camera: "48MP tripla + LiDAR + 12MP", bateria: "Até 29h" },
+    "iPhone 16": { processador: "A18", memoria: "8GB RAM", armazenamento: "128-512GB", tela: "6.1″ OLED 60Hz", camera: "48MP dupla + 12MP", bateria: "Até 22h" },
+    "iPhone 16 Plus": { processador: "A18", memoria: "8GB RAM", armazenamento: "128-512GB", tela: "6.7″ OLED 60Hz", camera: "48MP dupla + 12MP", bateria: "Até 27h" },
+    "iPhone 16 Pro": { processador: "A18 Pro", memoria: "8GB RAM", armazenamento: "128-1TB", tela: "6.3″ OLED 120Hz ProMotion", camera: "48MP tripla + LiDAR + 48MP", bateria: "Até 27h" },
+    "iPhone 16 Pro Max": { processador: "A18 Pro", memoria: "8GB RAM", armazenamento: "256-2TB", tela: "6.9″ OLED 120Hz ProMotion", camera: "48MP tripla + LiDAR + 48MP", bateria: "Até 33h" },
+    "iPhone 17": { processador: "A19", memoria: "8GB RAM", armazenamento: "128-1TB", tela: "6.3″ OLED 60Hz", camera: "48MP dupla + 12MP", bateria: "Até 24h" },
+    "iPhone Air": { processador: "A19", memoria: "8GB RAM", armazenamento: "256-1TB", tela: "6.6″ OLED 60Hz", camera: "48MP dupla + 12MP", bateria: "Até 25h" },
+    "iPhone 17 Pro": { processador: "A19 Pro", memoria: "12GB RAM", armazenamento: "256-2TB", tela: "6.3″ OLED 120Hz", camera: "48MP tripla + LiDAR + 48MP", bateria: "Até 28h" },
+    "iPhone 17 Pro Max": { processador: "A19 Pro", memoria: "12GB RAM", armazenamento: "256-2TB", tela: "6.9″ OLED 120Hz", camera: "48MP tripla + LiDAR + 48MP", bateria: "Até 35h" },
+    "iPhone 17e": { processador: "A18", memoria: "6GB RAM", armazenamento: "128-512GB", tela: "6.1″ OLED 60Hz", camera: "48MP + 12MP", bateria: "Até 22h" },
+
+    // ==================== MACBOOK ====================
+    "MacBook Pro 15\" (2018)": { processador: "Intel i7/i9 8ª gen", memoria: "16-32GB", armazenamento: "512GB-4TB SSD", tela: "15.4″ Retina", camera: "720p", bateria: "Até 10h" },
+    "MacBook Air (Retina, 2018)": { processador: "Intel i5 8ª gen", memoria: "8-16GB", armazenamento: "128-1.5TB SSD", tela: "13.3″ Retina", camera: "720p", bateria: "Até 12h" },
+    "MacBook Pro 13\" (2018)": { processador: "Intel i5/i7 8ª gen", memoria: "8-16GB", armazenamento: "256GB-2TB SSD", tela: "13.3″ Retina", camera: "720p", bateria: "Até 10h" },
+    "MacBook Air (Retina, 2019)": { processador: "Intel i5 10ª gen", memoria: "8-16GB", armazenamento: "256GB-2TB SSD", tela: "13.3″ Retina", camera: "720p", bateria: "Até 12h" },
+    "MacBook Pro 16\" (2019)": { processador: "Intel i7/i9 9ª gen", memoria: "16-64GB", armazenamento: "512GB-8TB SSD", tela: "16″ Retina XDR", camera: "720p", bateria: "Até 11h" },
+    "MacBook Air M1": { processador: "Apple M1 (8-core)", memoria: "8-16GB unificada", armazenamento: "256GB-2TB SSD", tela: "13.3″ Retina", camera: "1080p", bateria: "Até 18h" },
+    "MacBook Pro 13\" M1": { processador: "Apple M1 (8-core)", memoria: "8-16GB unificada", armazenamento: "256GB-2TB SSD", tela: "13.3″ Retina", camera: "1080p", bateria: "Até 20h" },
+    "MacBook Pro 14\" M1 Pro/Max": { processador: "M1 Pro/Max (10-core)", memoria: "16-32GB unificada", armazenamento: "512GB-8TB SSD", tela: "14.2″ Liquid Retina XDR", camera: "1080p", bateria: "Até 21h" },
+    "MacBook Pro 16\" M1 Pro/Max": { processador: "M1 Pro/Max (10-core)", memoria: "16-64GB unificada", armazenamento: "512GB-8TB SSD", tela: "16.2″ Liquid Retina XDR", camera: "1080p", bateria: "Até 21h" },
+    "MacBook Air M2": { processador: "Apple M2 (8-core)", memoria: "8-24GB unificada", armazenamento: "256GB-2TB SSD", tela: "13.6″ Liquid Retina", camera: "1080p", bateria: "Até 18h" },
+    "MacBook Pro 13\" M2": { processador: "Apple M2 (8-core)", memoria: "8-24GB unificada", armazenamento: "256GB-2TB SSD", tela: "13.3″ Retina", camera: "1080p", bateria: "Até 20h" },
+    "MacBook Pro M3": { processador: "Apple M3 (8-core)", memoria: "8-24GB unificada", armazenamento: "512GB-2TB SSD", tela: "14.2″ Liquid Retina XDR", camera: "1080p", bateria: "Até 22h" },
+    "MacBook Air M3": { processador: "Apple M3 (8-core)", memoria: "8-24GB unificada", armazenamento: "256GB-2TB SSD", tela: "13.6″ Liquid Retina", camera: "1080p", bateria: "Até 18h" },
+    "MacBook Air M4": { processador: "Apple M4 (10-core)", memoria: "16-24GB unificada", armazenamento: "256GB-2TB SSD", tela: "13.6″ Liquid Retina", camera: "12MP Center Stage", bateria: "Até 20h" },
+    "MacBook Air M5": { processador: "Apple M5 (10-core)", memoria: "16-32GB unificada", armazenamento: "512GB-4TB SSD", tela: "15.3″ Liquid Retina", camera: "12MP Center Stage", bateria: "Até 22h" },
+    "MacBook Pro M5 Pro/Max": { processador: "M5 Pro/Max (12-core)", memoria: "24-128GB unificada", armazenamento: "1TB-8TB SSD", tela: "16.2″ Liquid Retina XDR", camera: "12MP Center Stage", bateria: "Até 24h" },
+
+    // ==================== IPAD ====================
+    "iPad (6ª geração)": { processador: "A10 Fusion", memoria: "2GB RAM", armazenamento: "32-128GB", tela: "9.7″ Retina", camera: "8MP + 1.2MP", bateria: "Até 10h" },
+    "iPad Pro 12,9\" (3ª geração)": { processador: "A12X Bionic", memoria: "6GB RAM", armazenamento: "64GB-1TB", tela: "12.9″ Liquid Retina", camera: "12MP + 7MP", bateria: "Até 10h" },
+    "iPad (7ª geração)": { processador: "A10 Fusion", memoria: "3GB RAM", armazenamento: "32-128GB", tela: "10.2″ Retina", camera: "8MP + 1.2MP", bateria: "Até 10h" },
+    "iPad mini (5ª geração)": { processador: "A12 Bionic", memoria: "3GB RAM", armazenamento: "64-256GB", tela: "7.9″ Retina", camera: "8MP + 7MP", bateria: "Até 10h" },
+    "iPad Air (3ª geração)": { processador: "A12 Bionic", memoria: "3GB RAM", armazenamento: "64-256GB", tela: "10.5″ Retina", camera: "8MP + 7MP", bateria: "Até 10h" },
+    "iPad Pro 11\" (1ª geração)": { processador: "A12X Bionic", memoria: "6GB RAM", armazenamento: "64GB-1TB", tela: "11″ Liquid Retina", camera: "12MP + 7MP", bateria: "Até 10h" },
+    "iPad (8ª geração)": { processador: "A12 Bionic", memoria: "3GB RAM", armazenamento: "32-128GB", tela: "10.2″ Retina", camera: "8MP + 1.2MP", bateria: "Até 10h" },
+    "iPad Air (4ª geração)": { processador: "A14 Bionic", memoria: "4GB RAM", armazenamento: "64-256GB", tela: "10.9″ Liquid Retina", camera: "12MP + 7MP", bateria: "Até 10h" },
+    "iPad Pro (2020)": { processador: "A12Z Bionic", memoria: "6-8GB RAM", armazenamento: "128GB-2TB", tela: "12.9″ Liquid Retina XDR", camera: "12MP tripla + LiDAR", bateria: "Até 10h" },
+    "iPad (9ª geração)": { processador: "A13 Bionic", memoria: "3GB RAM", armazenamento: "64-256GB", tela: "10.2″ Retina", camera: "8MP + 12MP", bateria: "Até 10h" },
+    "iPad mini (6ª geração)": { processador: "A15 Bionic", memoria: "4GB RAM", armazenamento: "64-256GB", tela: "8.3″ Liquid Retina", camera: "12MP + 12MP", bateria: "Até 10h" },
+    "iPad Pro M1": { processador: "Apple M1", memoria: "8-16GB unificada", armazenamento: "128GB-2TB", tela: "12.9″ Liquid Retina XDR", camera: "12MP tripla + LiDAR", bateria: "Até 10h" },
+    "iPad (10ª geração)": { processador: "A14 Bionic", memoria: "4GB RAM", armazenamento: "64-256GB", tela: "10.9″ Liquid Retina", camera: "12MP + 12MP", bateria: "Até 10h" },
+    "iPad Air (5ª geração)": { processador: "Apple M1", memoria: "8GB unificada", armazenamento: "64GB-1TB", tela: "10.9″ Liquid Retina", camera: "12MP + 12MP", bateria: "Até 10h" },
+    "iPad Pro M2": { processador: "Apple M2", memoria: "8-16GB unificada", armazenamento: "128GB-2TB", tela: "12.9″ Liquid Retina XDR 120Hz", camera: "12MP tripla + LiDAR", bateria: "Até 10h" },
+    "iPad mini (7ª geração)": { processador: "A17 Pro", memoria: "8GB RAM", armazenamento: "128-512GB", tela: "8.3″ OLED 120Hz", camera: "48MP + 12MP", bateria: "Até 10h" },
+    "iPad Pro M4": { processador: "Apple M4", memoria: "16GB unificada", armazenamento: "256GB-2TB", tela: "13″ Tandem OLED 120Hz", camera: "12MP tripla + LiDAR", bateria: "Até 10h" },
+    "iPad Air M2": { processador: "Apple M2", memoria: "8-16GB unificada", armazenamento: "128GB-1TB", tela: "11″/13″ Liquid Retina", camera: "12MP + 12MP", bateria: "Até 10h" },
+    "iPad Air M4": { processador: "Apple M4", memoria: "12GB unificada", armazenamento: "256GB-2TB", tela: "11″/13″ Liquid Retina 120Hz", camera: "12MP + 12MP", bateria: "Até 10h" },
+
+    // ==================== APPLE WATCH ====================
+    "Apple Watch Series 4": { processador: "S4", memoria: "768MB", armazenamento: "16GB", tela: "1.78″ Retina", camera: "—", bateria: "18h" },
+    "Apple Watch Series 5": { processador: "S5", memoria: "1GB", armazenamento: "32GB", tela: "1.78″ Retina Always-On", camera: "—", bateria: "18h" },
+    "Apple Watch SE (1ª geração)": { processador: "S5", memoria: "1GB", armazenamento: "32GB", tela: "1.78″ Retina", camera: "—", bateria: "18h" },
+    "Apple Watch Series 6": { processador: "S6", memoria: "1GB", armazenamento: "32GB", tela: "1.78″ Retina Always-On", camera: "—", bateria: "18h" },
+    "Apple Watch Series 7": { processador: "S7", memoria: "1GB", armazenamento: "32GB", tela: "1.9″ Retina Always-On", camera: "—", bateria: "18h" },
+    "Apple Watch SE (2ª geração)": { processador: "S8", memoria: "1GB", armazenamento: "32GB", tela: "1.78″ Retina", camera: "—", bateria: "18h" },
+    "Apple Watch Series 8": { processador: "S8", memoria: "1GB", armazenamento: "32GB", tela: "1.78″ Retina Always-On", camera: "—", bateria: "18h" },
+    "Apple Watch Ultra": { processador: "S8", memoria: "1GB", armazenamento: "32GB", tela: "1.92″ Retina Always-On", camera: "—", bateria: "36h" },
+    "Apple Watch Series 9": { processador: "S9", memoria: "1GB", armazenamento: "64GB", tela: "1.9″ Retina Always-On 2000 nits", camera: "—", bateria: "18h" },
+    "Apple Watch Ultra 2": { processador: "S9", memoria: "1GB", armazenamento: "64GB", tela: "1.92″ Retina Always-On 3000 nits", camera: "—", bateria: "36h" },
+    "Apple Watch Series 10": { processador: "S10", memoria: "2GB", armazenamento: "64GB", tela: "2.0″ Wide Angle OLED", camera: "—", bateria: "18h" },
+    "Apple Watch Series 11": { processador: "S11", memoria: "2GB", armazenamento: "128GB", tela: "2.0″ LTPO OLED 2000 nits", camera: "—", bateria: "24h" },
+    "Apple Watch Ultra 3": { processador: "S11", memoria: "2GB", armazenamento: "128GB", tela: "2.1″ LTPO OLED 3000 nits", camera: "—", bateria: "72h" },
+    "Apple Watch SE (3ª geração)": { processador: "S10", memoria: "1GB", armazenamento: "64GB", tela: "1.78″ Retina", camera: "—", bateria: "18h" },
+
+    // ==================== AIRPODS ====================
+    "AirPods (2ª geração)": { processador: "H1", memoria: "—", armazenamento: "—", tela: "—", camera: "—", bateria: "5h + 19h case" },
+    "AirPods Pro (1ª geração)": { processador: "H1", memoria: "—", armazenamento: "—", tela: "—", camera: "—", bateria: "4.5h + 24h case" },
+    "AirPods Max": { processador: "H1", memoria: "—", armazenamento: "—", tela: "—", camera: "—", bateria: "20h" },
+    "AirPods (3ª geração)": { processador: "H1", memoria: "—", armazenamento: "—", tela: "—", camera: "—", bateria: "6h + 24h case" },
+    "AirPods Pro (2ª geração)": { processador: "H2", memoria: "—", armazenamento: "—", tela: "—", camera: "—", bateria: "6h + 30h case" },
+    "AirPods 4": { processador: "H2", memoria: "—", armazenamento: "—", tela: "—", camera: "—", bateria: "5h + 20h case" },
+    "AirPods 4 (ANC)": { processador: "H2", memoria: "—", armazenamento: "—", tela: "—", camera: "—", bateria: "4h + 20h case" },
+    "AirPods Pro 3": { processador: "H3", memoria: "—", armazenamento: "—", tela: "—", camera: "—", bateria: "6h + 30h case" },
+
+    // ==================== IMAC ====================
+    "iMac 24\" M1": { processador: "Apple M1 (8-core)", memoria: "8-16GB unificada", armazenamento: "256GB-2TB SSD", tela: "24″ 4.5K Retina", camera: "1080p", bateria: "— (desktop)" },
+    "iMac M3": { processador: "Apple M3 (8-core)", memoria: "8-24GB unificada", armazenamento: "256GB-2TB SSD", tela: "24″ 4.5K Retina", camera: "12MP Center Stage", bateria: "— (desktop)" },
+
+    // ==================== MAC MINI / STUDIO ====================
+    "Mac mini (2018)": { processador: "Intel i3/i5/i7 8ª gen", memoria: "8-64GB", armazenamento: "128GB-2TB SSD", tela: "—", camera: "—", bateria: "— (desktop)" },
+    "Mac mini M1": { processador: "Apple M1 (8-core)", memoria: "8-16GB unificada", armazenamento: "256GB-2TB SSD", tela: "—", camera: "—", bateria: "— (desktop)" },
+    "Mac Studio M1 Max/Ultra": { processador: "M1 Max/Ultra", memoria: "32-128GB unificada", armazenamento: "512GB-8TB SSD", tela: "—", camera: "—", bateria: "— (desktop)" },
+    "Mac mini M2": { processador: "Apple M2 (8-core)", memoria: "8-24GB unificada", armazenamento: "256GB-8TB SSD", tela: "—", camera: "—", bateria: "— (desktop)" },
+    "Mac mini M4": { processador: "Apple M4 (10-core)", memoria: "16-64GB unificada", armazenamento: "512GB-8TB SSD", tela: "—", camera: "—", bateria: "— (desktop)" },
+    "Mac Studio M4 Max": { processador: "M4 Max (16-core)", memoria: "64-192GB unificada", armazenamento: "1TB-8TB SSD", tela: "—", camera: "—", bateria: "— (desktop)" },
+
+    // ==================== DEFAULT ====================
+    "default": { processador: "A15 Bionic", memoria: "6GB RAM", armazenamento: "128GB", tela: "6.1″ Super Retina", camera: "12MP dupla", bateria: "Até 20h" }
+};
+
+        // ==================== FUNÇÕES BÁSICAS ====================
+        function salvarProdutos() {
+            localStorage.setItem('apple_produtos', JSON.stringify(produtos));
+        }
+
+        function showSection(section) {
+            // Bloquear acesso à seção de IA para Vendedor
+            if (section === 'cadastrar' && usuarioAtual && usuarioAtual.role === 'Gerente') {
+                alert('Acesso restrito. O cadastro de produtos é exclusivo para o Vendedor.');
+                return;
+            }
+            if (section === 'editar' && usuarioAtual && usuarioAtual.role !== 'Gerente') {
+                alert('Acesso restrito. A edição de produtos é exclusiva para o Gerente.');
+                return;
+            }
+            if (section === 'ia' && usuarioAtual && usuarioAtual.role !== 'Gerente') {
+                alert('Acesso restrito. O Assistente IA é exclusivo para o Gerente.');
+                return;
+            }
+            if (section === 'cadastrar' && usuarioAtual && usuarioAtual.role === 'Subgerente') {
+                alert('Acesso restrito. O cadastro de produtos é exclusivo para o Vendedor.');
+                return;
+            }
+            if (section === 'registrar-chegada' && usuarioAtual && usuarioAtual.role === 'Subgerente') {
+                alert('Acesso restrito.');
+                return;
+            }
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`section-${section}`).classList.remove('hidden');
+            
+            if (section === 'estoque') renderEstoque();
+            if (section === 'editar') renderEditar();
+            if (section === 'dashboard') renderDashboard();
+            if (section === 'ia') renderChat();
+            if (section === 'mercadorias') renderMercadorias();
+            if (section === 'relatorio') renderRelatorio();
+        }
+
+        // ==================== CADASTRO ====================
+        function cadastrarProduto(e) {
+            e.preventDefault();
+            
+            const novo = {
+                id: Date.now(),
+                tipo: document.getElementById('tipo').value,
+                modelo: document.getElementById('modelo').value,
+                quantidade: 0,
+                valor: parseFloat(document.getElementById('valor').value),
+                historicoVendas: []
+            };
+            
+            // Verifica se já existe para somar
+            let existe = produtos.find(p => p.modelo === novo.modelo);
+            if(existe) {
+                existe.quantidade += novo.quantidade;
+                existe.valor = novo.valor; // Atualiza o preço
+            } else {
+                produtos.push(novo);
+            }
+            
+            salvarProdutos();
+            alert("✅ Produto cadastrado/atualizado com sucesso no estoque!");
+            e.target.reset();
+            showSection('estoque');
+            renderDashboard();
+        }
+function renderEstoque(filtro = '') {
+    const container = document.getElementById('grid-estoque');
+    container.innerHTML = '';
+    
+    const filtrados = produtos.filter(p => p.modelo.toLowerCase().includes(filtro.toLowerCase()));
+    
+    filtrados.forEach(prod => {
+        const img = imagensModelos[prod.modelo] || imagensModelos["default"];
+        const specs = especificacoesTecnicas[prod.modelo] || especificacoesTecnicas["default"];
+        const valorFormatado = (prod.valor || 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'w-full h-full';
+        
+        const card = document.createElement('div');
+        card.className = `bg-white dark:bg-zinc-900 rounded-3xl overflow-hidden card-hover border border-zinc-100 dark:border-zinc-800 p-6 flex flex-col relative group transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 h-full cursor-pointer select-none`;
+        card.onclick = () => abrirModalProduto(prod);
+        
+        card.innerHTML = `
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 flex flex-col p-6 pointer-events-none">
+                <div class="flex items-center gap-3 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-300 delay-100">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-info-circle text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-white text-lg">${prod.modelo}</h4>
+                        <p class="text-zinc-300 text-sm capitalize">${prod.tipo}</p>
+                    </div>
+                </div>
+                <div class="space-y-3 flex-1 opacity-0 group-hover:opacity-100 transition-all duration-400 delay-200">
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><span class="text-zinc-400 block mb-1 text-xs uppercase tracking-wider font-medium">Processador</span><span class="font-semibold text-white block">${specs.processador}</span></div>
+                        <div><span class="text-zinc-400 block mb-1 text-xs uppercase tracking-wider font-medium">Memória</span><span class="font-semibold text-white block">${specs.memoria}</span></div>
+                        <div><span class="text-zinc-400 block mb-1 text-xs uppercase tracking-wider font-medium">Armazenamento</span><span class="font-semibold text-white block">${specs.armazenamento}</span></div>
+                        <div><span class="text-zinc-400 block mb-1 text-xs uppercase tracking-wider font-medium">Tela</span><span class="font-semibold text-white block">${specs.tela}</span></div>
+                    </div>
+                    <div class="pt-2 border-t border-white/20">
+                        <div class="flex items-center justify-between text-xs"><span class="text-zinc-400 uppercase tracking-wider font-medium">Câmera</span><span class="font-semibold text-emerald-300">${specs.camera}</span></div>
+                        <div class="flex items-center justify-between text-xs mt-1"><span class="text-zinc-400 uppercase tracking-wider font-medium">Bateria</span><span class="font-semibold text-emerald-300">${specs.bateria}</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <img src="${img}" class="w-32 h-32 object-contain mb-4 mx-auto opacity-90 dark:invert transition-transform duration-300 group-hover:scale-105 z-10 relative">
+            <h4 class="font-semibold text-lg dark:text-white mb-2 z-10 relative transition-colors group-hover:text-zinc-600 dark:group-hover:text-zinc-300">${prod.modelo}</h4>
+            <p class="text-zinc-500 text-sm mb-6 capitalize z-10 relative">${prod.tipo}</p>
+            <div class="w-full bg-zinc-50 dark:bg-zinc-800 rounded-2xl p-4 mt-auto relative z-10">
+                <p class="text-2xl font-bold dark:text-white mb-1">${prod.quantidade || 0} <span class="text-xs font-normal text-zinc-500">unid.</span></p>
+                <p class="text-xl font-semibold text-zinc-900 dark:text-white">${valorFormatado}</p>
+            </div>
+        `;
+        
+        wrapper.appendChild(card);
+        container.appendChild(wrapper);
+    });
+    
+    if (filtrados.length === 0) {
+        container.innerHTML = `<p class="col-span-full text-center py-12 text-zinc-400 text-lg font-medium">🔍 Nenhum produto encontrado</p>`;
+    }
+}
+
+function filtrarEstoque() {
+    const termo = document.getElementById('busca').value;
+    renderEstoque(termo);
+}
+
+        // ==================== EDITAR ====================
+        function renderEditar() {
+            const container = document.getElementById('lista-editar');
+            container.innerHTML = '';
+            
+            produtos.forEach((prod, index) => {
+                const img = imagensModelos[prod.modelo] || imagensModelos["default"];
+                
+                const div = document.createElement('div');
+                div.className = "bg-white dark:bg-zinc-900 rounded-3xl p-6 flex items-center gap-4 border border-zinc-100 dark:border-zinc-800";
+                div.innerHTML = `
+                    <img src="${img}" class="w-12 h-12 object-contain dark:invert">
+                    <div class="flex-1">
+                        <h4 class="font-semibold dark:text-white">${prod.modelo}</h4>
+                        <p class="text-sm text-zinc-500">${prod.quantidade} unid.</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="editarProduto(${index})" class="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="excluirProduto(${index})" class="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function editarProduto(index) {
+            const prod = produtos[index];
+
+            // Cria modal inline de edição
+            const existing = document.getElementById('modal-editar-produto');
+            if (existing) existing.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'modal-editar-produto';
+            modal.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] backdrop-blur-sm';
+            modal.innerHTML = `
+                <div class="modal bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded-3xl max-w-md w-full mx-4 p-8 border border-zinc-200 dark:border-zinc-800">
+                    <h3 class="text-xl font-semibold mb-6">Editar — ${prod.modelo}</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Quantidade</label>
+                            <input id="edit-qtd" type="number" min="0" value="${prod.quantidade}"
+                                class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 focus:outline-none focus:border-black dark:focus:border-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Valor Unitário (R$)</label>
+                            <input id="edit-valor" type="number" step="0.01" min="0" value="${prod.valor}"
+                                class="w-full rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 focus:outline-none focus:border-black dark:focus:border-white">
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mt-8">
+                        <button onclick="salvarEdicaoProduto(${index})"
+                            class="flex-1 bg-black dark:bg-white text-white dark:text-black py-3 rounded-2xl font-medium hover:opacity-90 transition-opacity">
+                            Salvar
+                        </button>
+                        <button onclick="document.getElementById('modal-editar-produto').remove()"
+                            class="flex-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 py-3 rounded-2xl font-medium hover:opacity-80 transition-opacity">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function salvarEdicaoProduto(index) {
+            const prod = produtos[index];
+            const novaQtd = parseInt(document.getElementById('edit-qtd').value);
+            const novoValor = parseFloat(document.getElementById('edit-valor').value);
+
+            if (!isNaN(novaQtd)) prod.quantidade = novaQtd;
+            if (!isNaN(novoValor)) prod.valor = novoValor;
+
+            salvarProdutos();
+            document.getElementById('modal-editar-produto').remove();
+            renderEditar();
+            renderDashboard();
+            // Atualiza estoque se a aba estiver visível
+            const secaoEstoque = document.getElementById('section-estoque');
+            if (secaoEstoque && !secaoEstoque.classList.contains('hidden')) {
+                renderEstoque();
+            }
+        }
+
+        function excluirProduto(index) {
+            if (confirm("Excluir este produto do sistema?")) {
+                produtos.splice(index, 1);
+                salvarProdutos();
+                renderEditar();
+                renderDashboard();
+            }
+        }
+
+        // ==================== DASHBOARD ====================
+        function renderDashboard() {
+            let totalValor = 0;
+            let totalQtd = 0;
+            
+            produtos.forEach(p => {
+                totalValor += (p.quantidade * p.valor);
+                totalQtd += p.quantidade;
+            });
+            
+            document.getElementById('total-valor').textContent = `R$ ${totalValor.toLocaleString('pt-BR')}`;
+
+            // Vendas do dia
+            const vendasHoje = (JSON.parse(localStorage.getItem('apple_vendas')) || [])
+                .filter(v => new Date(v.horario).toDateString() === new Date().toDateString());
+
+            const totalValorHoje      = vendasHoje.reduce((acc, v) => acc + v.valor, 0);
+            const totalItensHoje      = vendasHoje.reduce((acc, v) => acc + v.quantidade, 0);
+            const totalTransacoesHoje = vendasHoje.reduce((acc, v) => acc + (v.numTransacoes || 1), 0);
+
+            // Card Gerente: valor total
+            document.getElementById('vendas-hoje').textContent =
+                totalValorHoje.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            // Card Gerente: itens vendidos + nº transações
+            document.getElementById('dash-itens-vendidos').innerHTML =
+                `${totalItensHoje} <span class="text-base font-normal text-zinc-400">un.</span>`;
+            document.getElementById('dash-num-transacoes-gerente').textContent =
+                `${totalTransacoesHoje} transaç${totalTransacoesHoje === 1 ? 'ão' : 'ões'}`;
+
+            // Card Vendedor: nº de transações
+            document.getElementById('vendas-hoje-qtd').textContent = totalTransacoesHoje;
+            document.getElementById('dash-num-transacoes-vendedor').textContent =
+                `${totalTransacoesHoje} transaç${totalTransacoesHoje === 1 ? 'ão' : 'ões'} hoje`;
+
+            // Todos veem a quantidade total
+            document.getElementById('total-qtd-estoque').textContent = totalQtd;
+            
+            const baixos = produtos.filter(p => p.quantidade <= 5).length;
+            document.getElementById('alerta-count').textContent = baixos || '0';
+            
+            const destaqueContainer = document.getElementById('destaque-vendas');
+            destaqueContainer.innerHTML = produtos.slice(0, 5).map(p => `
+                <div class="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-3xl p-4 text-center">
+                    <img src="${imagensModelos[p.modelo] || imagensModelos["default"]}" class="mx-auto mb-3 w-16 h-16 object-contain dark:invert">
+                    <p class="font-medium text-sm dark:text-white truncate" title="${p.modelo}">${p.modelo}</p>
+                    <p class="text-xs text-emerald-600 dark:text-emerald-400">${p.quantidade} em estoque</p>
+                </div>
+            `).join('');
+        }
+
+        // ==================== ANÁLISE IA ====================
+        function analisarEstoqueIA() {
+            const container = document.getElementById('resultado-ia');
+            const alertasDiv = document.getElementById('alertas-ia');
+            alertasDiv.innerHTML = '';
+            
+            container.classList.remove('hidden');
+            
+            produtos.forEach(prod => {
+                if (prod.quantidade <= 8) {
+                    const sugestao = 15; // Fixo para exemplo
+                    const acao = usuarioAtual.role === 'Vendedor' ? 
+                                 `<button onclick="iniciarChatbotVendedor('${prod.modelo}')" class="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-2xl text-sm font-medium">Solicitar Reposição ao Gerente</button>` :
+                                 `<button onclick="iniciarChatbotGerente('${prod.modelo}', ${sugestao})" class="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-2xl text-sm font-medium">Autorizar Compra (Fornecedor)</button>`;
+
+                    alertasDiv.innerHTML += `
+                    <div class="border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 rounded-3xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <p class="font-semibold text-lg dark:text-white">${prod.modelo}</p>
+                                <p class="text-sm text-zinc-500">Estoque atual: <strong>${prod.quantidade}</strong></p>
+                            </div>
+                            <span class="text-red-500 font-medium bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded-full text-xs">BAIXO</span>
+                        </div>
+                        ${acao}
+                    </div>`;
+                }
+            });
+            
+            if (alertasDiv.innerHTML === '') {
+                alertasDiv.innerHTML = `<p class="text-emerald-600 dark:text-emerald-400 text-center py-6">✅ Estoque saudável no momento.</p>`;
+            }
+        }
+
+        // ==================== CHATBOT ====================
+        function iniciarChatbotVendedor(modelo) {
+            chatHistory.push({ tipo: "user", msg: `Precisamos repor o estoque de ${modelo}.` });
+            chatHistory.push({ tipo: "ia", msg: `Alerta enviado ao Gerente via WhatsApp e Sistema. Ele avaliará a compra de reposição de ${modelo}.` });
+            renderChat();
+        }
+
+        function iniciarChatbotGerente(modelo, qtd) {
+            chatHistory.push({ tipo: "ia", msg: `Fornecedor integrado: Deseja autorizar a compra de ${qtd} unidades do ${modelo}?` });
+            renderChat();
+        }
+
+        function renderChat() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = chatHistory.map(msg => `
+                <div class="${msg.tipo === 'ia' ? 'flex justify-start' : 'flex justify-end'}">
+                    <div class="${msg.tipo === 'ia' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200' : 'bg-black dark:bg-white text-white dark:text-black'} px-5 py-3 rounded-3xl max-w-[80%] text-sm">
+                        ${msg.msg}
+                    </div>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function enviarRespostaChat() {
+            const input = document.getElementById('chat-input');
+            if (!input.value.trim()) return;
+            
+            chatHistory.push({ tipo: "user", msg: input.value });
+            
+            setTimeout(() => {
+                let respostaIA = usuarioAtual.role === 'Vendedor' ? 
+                    "Anotado. O gerente receberá este recado no painel dele." : 
+                    "Ordem processada! Enviando solicitação automática ao distribuidor Apple.";
+                
+                chatHistory.push({ tipo: "ia", msg: respostaIA });
+                renderChat();
+            }, 800);
+            
+            renderChat();
+            input.value = '';
+        }
+
+        function informarGerente() {
+            const btn = document.getElementById('btn-informar-gerente');
+            const msg = document.getElementById('msg-gerente-informado');
+            btn.classList.add('hidden');
+            msg.classList.remove('hidden');
+
+            adicionarNotificacao('Gerente', '🔔 Vendedor sinalizou necessidade de reposição de estoque.', 'fa-triangle-exclamation');
+
+            setTimeout(() => {
+                msg.classList.add('hidden');
+                btn.classList.remove('hidden');
+            }, 4000);
+        }
+
+
+        // ==================== MERCADORIAS ====================
+        let mercadorias = JSON.parse(localStorage.getItem('apple_mercadorias')) || [];
+
+        function registrarMercadoria() {
+            const produto   = document.getElementById('merc-produto').value.trim();
+            const fornecedor = document.getElementById('merc-fornecedor').value.trim();
+            const quantidade = parseInt(document.getElementById('merc-quantidade').value);
+            const horario    = document.getElementById('merc-horario').value;
+            const erro       = document.getElementById('merc-erro');
+
+            if (!produto || !fornecedor || !quantidade || !horario) {
+                erro.classList.remove('hidden');
+                return;
+            }
+            erro.classList.add('hidden');
+
+            const registro = { id: Date.now(), produto, fornecedor, quantidade, horario };
+            mercadorias.unshift(registro);
+            localStorage.setItem('apple_mercadorias', JSON.stringify(mercadorias));
+
+            // Limpar campos
+            document.getElementById('merc-fornecedor').value = '';
+            document.getElementById('merc-quantidade').value = '';
+            document.getElementById('merc-horario').value = '';
+
+            renderMercadorias();
+        }
+
+        function excluirMercadoria(id) {
+            if (!confirm('Remover este registro?')) return;
+            mercadorias = mercadorias.filter(m => m.id !== id);
+            localStorage.setItem('apple_mercadorias', JSON.stringify(mercadorias));
+            renderMercadorias();
+        }
+
+        function renderMercadorias() {
+            const container = document.getElementById('lista-mercadorias');
+            if (mercadorias.length === 0) {
+                container.innerHTML = '<p class="text-zinc-400 dark:text-zinc-600 text-sm text-center py-10">Nenhuma chegada registrada ainda.</p>';
+                return;
+            }
+            container.innerHTML = mercadorias.map(m => {
+                const dt = new Date(m.horario);
+                const dataFmt = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const horaFmt = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                return `
+                <div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-zinc-100 dark:border-zinc-800 flex items-center gap-6 shadow-sm">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-truck-ramp-box text-indigo-500 text-lg"></i>
+                    </div>
+                    <div class="flex-1 grid grid-cols-4 gap-4 items-center">
+                        <div>
+                            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Data de Chegada</p>
+                            <p class="font-semibold text-sm dark:text-white">${dataFmt} às ${horaFmt}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Transportadora</p>
+                            <p class="font-semibold text-sm dark:text-white">${m.fornecedor}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Produto</p>
+                            <p class="font-semibold text-sm dark:text-white">${m.produto}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Volume</p>
+                            <p class="font-semibold text-sm dark:text-white">${m.quantidade} un.</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Vencimento da Entrega</p>
+                            <p class="font-semibold text-sm dark:text-white">${m.vencimento ? new Date(m.vencimento + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}</p>
+                            <span class="text-xs px-2 py-0.5 rounded-full ${!m.vencimento ? 'hidden' : Math.ceil((new Date(m.vencimento + 'T00:00:00') - new Date().setHours(0,0,0,0)) / 86400000) < 0 ? 'text-red-500 bg-red-50 dark:bg-red-900/30' : Math.ceil((new Date(m.vencimento + 'T00:00:00') - new Date().setHours(0,0,0,0)) / 86400000) <= 3 ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/30' : 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30'}">${!m.vencimento ? '' : Math.ceil((new Date(m.vencimento + 'T00:00:00') - new Date().setHours(0,0,0,0)) / 86400000) < 0 ? 'Vencido' : Math.ceil((new Date(m.vencimento + 'T00:00:00') - new Date().setHours(0,0,0,0)) / 86400000) <= 3 ? 'Vence em breve' : 'No prazo'}</span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+
+        function vendedorRegistrarChegada() {
+            const produto     = document.getElementById('reg-produto').value.trim();
+            const fornecedor  = document.getElementById('reg-fornecedor').value.trim();
+            const quantidade  = parseInt(document.getElementById('reg-quantidade').value);
+            const horario     = document.getElementById('reg-horario').value;
+            const vencimento  = document.getElementById('reg-vencimento').value;
+            const erro        = document.getElementById('reg-erro');
+            const sucesso     = document.getElementById('reg-sucesso');
+
+            if (!produto || !fornecedor || !quantidade || !horario || !vencimento) {
+                erro.classList.remove('hidden');
+                sucesso.classList.add('hidden');
+                return;
+            }
+            erro.classList.add('hidden');
+
+            const registro = { id: Date.now(), produto, fornecedor, quantidade, horario, vencimento };
+            mercadorias.unshift(registro);
+            localStorage.setItem('apple_mercadorias', JSON.stringify(mercadorias));
+
+            // Atualizar o estoque de produtos
+            const produtoExistente = produtos.find(p => p.modelo === produto);
+            if (produtoExistente) {
+                produtoExistente.quantidade += quantidade;
+            } else {
+                produtos.push({ id: Date.now(), tipo: getTipoByModelo(produto), modelo: produto, quantidade, valor: 0, historicoVendas: [] });
+            }
+            salvarProdutos();
+            renderDashboard();
+
+            // Limpar campos
+            document.getElementById('reg-fornecedor').value = '';
+            document.getElementById('reg-quantidade').value = '';
+            document.getElementById('reg-horario').value = '';
+            document.getElementById('reg-vencimento').value = '';
+
+            sucesso.classList.remove('hidden');
+            setTimeout(() => sucesso.classList.add('hidden'), 3500);
+
+            // Atualizar balanço se a sub-aba estiver visível
+            const subBalanco = document.getElementById('sub-content-balanco');
+            if (subBalanco && !subBalanco.classList.contains('hidden')) {
+                renderBalancoInsumos();
+            }
+        }
+
+        // ==================== SISTEMA DE NOTIFICAÇÕES ====================
+        function getNotificacoes() {
+            return JSON.parse(localStorage.getItem('apple_notificacoes')) || [];
+        }
+
+        function salvarNotificacoes(lista) {
+            localStorage.setItem('apple_notificacoes', JSON.stringify(lista));
+        }
+
+        function adicionarNotificacao(destinatario, mensagem, icone = 'fa-bell') {
+            const lista = getNotificacoes();
+            lista.unshift({ id: Date.now(), destinatario, mensagem, icone, lida: false, hora: new Date().toISOString() });
+            salvarNotificacoes(lista);
+            atualizarBadgeNotif();
+        }
+
+        function atualizarBadgeNotif() {
+            if (!usuarioAtual) return;
+            const todas = getNotificacoes();
+            const minhas = todas.filter(n => n.destinatario === usuarioAtual.role && !n.lida);
+            const badge = document.getElementById('notif-count');
+            if (minhas.length > 0) {
+                badge.textContent = minhas.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function toggleNotifPanel() {
+            const panel = document.getElementById('notif-panel');
+            const overlay = document.getElementById('notif-overlay');
+            const isHidden = panel.classList.contains('hidden');
+            if (isHidden) {
+                renderNotifPanel();
+                panel.classList.remove('hidden');
+                overlay.classList.remove('hidden');
+                // Marcar como lidas
+                const lista = getNotificacoes();
+                lista.forEach(n => { if (n.destinatario === usuarioAtual.role) n.lida = true; });
+                salvarNotificacoes(lista);
+                atualizarBadgeNotif();
+            } else {
+                fecharNotifPanel();
+            }
+        }
+
+        function fecharNotifPanel() {
+            document.getElementById('notif-panel').classList.add('hidden');
+            document.getElementById('notif-overlay').classList.add('hidden');
+        }
+
+        function renderNotifPanel() {
+            const todas = getNotificacoes();
+            const minhas = todas.filter(n => n.destinatario === usuarioAtual.role);
+            const lista = document.getElementById('notif-lista');
+            if (minhas.length === 0) {
+                lista.innerHTML = '<p class="text-zinc-400 text-xs text-center py-6">Nenhuma notificação.</p>';
+                return;
+            }
+            lista.innerHTML = minhas.map(n => {
+                const dt = new Date(n.hora);
+                const horaFmt = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const dataFmt = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                return `
+                <div class="px-5 py-4 flex items-start gap-3 ${n.lida ? 'opacity-60' : ''}">
+                    <div class="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fa-solid ${n.icone} text-zinc-600 dark:text-zinc-300 text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-zinc-800 dark:text-zinc-200">${n.mensagem}</p>
+                        <p class="text-xs text-zinc-400 mt-1">${dataFmt} às ${horaFmt}</p>
+                    </div>
+                    ${!n.lida ? '<span class="w-2 h-2 rounded-full bg-red-500 flex-shrink-0 mt-2"></span>' : ''}
+                </div>`;
+            }).join('');
+        }
+
+        function limparNotificacoes() {
+            const todas = getNotificacoes();
+            const restantes = todas.filter(n => n.destinatario !== usuarioAtual.role);
+            salvarNotificacoes(restantes);
+            atualizarBadgeNotif();
+            renderNotifPanel();
+        }
+
+        function enviarRelatorioGerente() {
+            const btn = document.getElementById('btn-enviar-relatorio');
+            const msg = document.getElementById('msg-relatorio-enviado');
+
+            // Monta resumo detalhado
+            const hoje = new Date();
+            hoje.setHours(23, 59, 59, 999);
+            const seteDiasAtras = new Date();
+            seteDiasAtras.setDate(hoje.getDate() - 6);
+            seteDiasAtras.setHours(0, 0, 0, 0);
+
+            const chegadasSemana = mercadorias.filter(m => {
+                const dt = new Date(m.horario);
+                return dt >= seteDiasAtras && dt <= hoje;
+            });
+
+            const totalUnid = chegadasSemana.reduce((acc, m) => acc + (m.quantidade || 0), 0);
+            const fmtData = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+
+            // Agrupar por modelo
+            const porModelo = {};
+            chegadasSemana.forEach(m => {
+                if (!porModelo[m.produto]) porModelo[m.produto] = 0;
+                porModelo[m.produto] += (m.quantidade || 0);
+            });
+
+            const detalhesModelos = Object.entries(porModelo)
+                .map(([modelo, qtd]) => `${modelo}: ${qtd} un.`)
+                .join(' | ');
+
+            const textoNotif = `📋 Relatório semanal (${fmtData(seteDiasAtras)}–${fmtData(hoje)}): ${chegadasSemana.length} chegada${chegadasSemana.length !== 1 ? 's' : ''}, ${totalUnid} unidades recebidas.${detalhesModelos ? ' Por modelo — ' + detalhesModelos : ''}`;
+
+            // Salvar dados do relatório para o polling da IA detectar
+            const dadosRelatorio = {
+                enviado: new Date().toISOString(),
+                periodo: `${fmtData(seteDiasAtras)} – ${fmtData(hoje)}`,
+                totalChegadas: chegadasSemana.length,
+                totalUnidades: totalUnid,
+                porModelo
+            };
+            localStorage.setItem('apple_ultimo_relatorio', JSON.stringify(dadosRelatorio));
+
+            adicionarNotificacao('Gerente', textoNotif, 'fa-chart-bar');
+
+            // Injeta mensagem na IA do Gerente com dados detalhados
+            const horaEnvio = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const linhasModelos = Object.entries(porModelo)
+                .map(([modelo, qtd]) => `• ${modelo}: ${qtd} unidade${qtd !== 1 ? 's' : ''} recebida${qtd !== 1 ? 's' : ''}`)
+                .join('<br>');
+            const msgIA = `📋 Relatório recebido do Subgerente às ${horaEnvio}.<br><br>Período: ${fmtData(seteDiasAtras)} – ${fmtData(hoje)}<br>Total de chegadas: ${chegadasSemana.length}<br>Total de unidades recebidas: ${totalUnid}<br><br>${linhasModelos || 'Nenhuma chegada registrada no período.'}`;
+            chatHistory.push({ tipo: 'ia', msg: msgIA });
+
+            btn.classList.add('hidden');
+            msg.classList.remove('hidden');
+            setTimeout(() => {
+                msg.classList.add('hidden');
+                btn.classList.remove('hidden');
+            }, 4000);
+        }
+
+        function hideModal() {
+            document.getElementById('modal-notif').classList.add('hidden');
+        }
+
+        // ==================== RELATÓRIO SEMANAL ====================
+        function renderRelatorio() {
+            const hoje = new Date();
+            hoje.setHours(23, 59, 59, 999);
+            const seteDiasAtras = new Date();
+            seteDiasAtras.setDate(hoje.getDate() - 6);
+            seteDiasAtras.setHours(0, 0, 0, 0);
+
+            // Período no topo
+            const fmtData = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            document.getElementById('relatorio-periodo').textContent =
+                fmtData(seteDiasAtras) + ' → ' + fmtData(hoje);
+
+            // Filtrar chegadas da semana
+            const chegadasSemana = mercadorias.filter(m => {
+                const dt = new Date(m.horario);
+                return dt >= seteDiasAtras && dt <= hoje;
+            });
+
+            document.getElementById('rel-total-chegadas').textContent = chegadasSemana.length;
+            document.getElementById('rel-total-unidades').textContent =
+                chegadasSemana.reduce((acc, m) => acc + (m.quantidade || 0), 0);
+
+            // Lista de chegadas
+            const listaEl = document.getElementById('rel-lista-chegadas');
+            if (chegadasSemana.length === 0) {
+                listaEl.innerHTML = '<p class="text-zinc-400 text-sm text-center py-8">Nenhuma chegada nesta semana.</p>';
+            } else {
+                listaEl.innerHTML = chegadasSemana.map(m => {
+                    const dt = new Date(m.horario);
+                    const dataFmt = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const horaFmt = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                    const diasVenc = m.vencimento
+                        ? Math.ceil((new Date(m.vencimento + 'T00:00:00') - new Date().setHours(0,0,0,0)) / 86400000)
+                        : null;
+                    const badgeVenc = m.vencimento
+                        ? diasVenc < 0
+                            ? '<span class="text-xs px-2 py-0.5 rounded-full text-red-500 bg-red-50 dark:bg-red-900/30">Vencido</span>'
+                            : diasVenc <= 3
+                                ? '<span class="text-xs px-2 py-0.5 rounded-full text-amber-500 bg-amber-50 dark:bg-amber-900/30">Vence em breve</span>'
+                                : '<span class="text-xs px-2 py-0.5 rounded-full text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30">No prazo</span>'
+                        : '';
+                    return `
+                    <div class="px-6 py-4 flex items-center gap-6">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-truck-ramp-box text-indigo-500 text-sm"></i>
+                        </div>
+                        <div class="flex-1 grid grid-cols-4 gap-4 items-center">
+                            <div>
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Produto</p>
+                                <p class="font-medium text-sm dark:text-white">${m.produto}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Transportadora</p>
+                                <p class="font-medium text-sm dark:text-white">${m.fornecedor}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Volume</p>
+                                <p class="font-medium text-sm dark:text-white">${m.quantidade} un.</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Data de Chegada</p>
+                                <p class="font-medium text-sm dark:text-white">${dataFmt} às ${horaFmt}</p>
+                                ${badgeVenc}
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            // Resumo por produto (agrupando chegadas da semana)
+            const porProduto = {};
+            chegadasSemana.forEach(m => {
+                if (!porProduto[m.produto]) porProduto[m.produto] = { chegadas: 0, unidades: 0 };
+                porProduto[m.produto].chegadas++;
+                porProduto[m.produto].unidades += (m.quantidade || 0);
+            });
+
+            // Estoque atual de cada produto
+            produtos.forEach(p => {
+                if (!porProduto[p.modelo]) return;
+                porProduto[p.modelo].estoqueAtual = p.quantidade;
+            });
+
+            const resumoEl = document.getElementById('rel-resumo-produtos');
+            const entradas = Object.entries(porProduto);
+            if (entradas.length === 0) {
+                resumoEl.innerHTML = '<p class="text-zinc-400 text-sm text-center py-8">Sem movimentação nesta semana.</p>';
+            } else {
+                resumoEl.innerHTML = entradas.map(([modelo, dados]) => `
+                    <div class="px-6 py-4 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <img src="${imagensModelos[modelo] || imagensModelos['default']}"
+                                class="w-10 h-10 object-contain dark:invert opacity-80">
+                            <div>
+                                <p class="font-semibold text-sm dark:text-white">${modelo}</p>
+                                <p class="text-xs text-zinc-400">${dados.chegadas} entrega${dados.chegadas > 1 ? 's' : ''} registrada${dados.chegadas > 1 ? 's' : ''}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-6 text-right">
+                            <div>
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Recebido</p>
+                                <p class="font-semibold text-sm text-indigo-600 dark:text-indigo-400">${dados.unidades} un.</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Estoque Atual</p>
+                                <p class="font-semibold text-sm dark:text-white">${dados.estoqueAtual !== undefined ? dados.estoqueAtual + ' un.' : '—'}</p>
+                            </div>
+                        </div>
+                    </div>`).join('');
+            }
+        }
+
+        // ==================== SUB-ABAS DA IA ====================
+        function trocarSubAbaIA(aba) {
+            document.querySelectorAll('.sub-aba-ia').forEach(btn => {
+                btn.classList.remove('border-black', 'dark:border-white', 'text-black', 'dark:text-white');
+                btn.classList.add('border-transparent', 'text-zinc-400');
+            });
+            const btnAtivo = document.getElementById(`sub-aba-${aba}`);
+            btnAtivo.classList.remove('border-transparent', 'text-zinc-400');
+            btnAtivo.classList.add('border-black', 'dark:border-white', 'text-black', 'dark:text-white');
+
+            document.getElementById('sub-content-analise').classList.add('hidden');
+            document.getElementById('sub-content-balanco').classList.add('hidden');
+            document.getElementById('sub-content-vendas').classList.add('hidden');
+            document.getElementById(`sub-content-${aba}`).classList.remove('hidden');
+
+            if (aba === 'balanco') renderBalancoInsumos();
+            if (aba === 'vendas') renderVendas();
+        }
+
+        // ==================== VENDAS ====================
+        function getVendas() {
+            return JSON.parse(localStorage.getItem('apple_vendas')) || [];
+        }
+
+        function salvarVendas(lista) {
+            localStorage.setItem('apple_vendas', JSON.stringify(lista));
+        }
+
+        function preencherSelectVendas() {
+            const select = document.getElementById('venda-produto');
+            const produtosAtuais = JSON.parse(localStorage.getItem('apple_produtos')) || [];
+            const valorAtual = select.value;
+            select.innerHTML = '<option value="">Selecione o produto...</option>';
+            produtosAtuais.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.modelo;
+                opt.textContent = `${p.modelo} (${p.quantidade} em estoque)`;
+                select.appendChild(opt);
+            });
+            if (valorAtual) select.value = valorAtual;
+        }
+
+        function calcularPreviewVenda() {
+            const modelo    = document.getElementById('venda-produto').value;
+            const quantidade = parseInt(document.getElementById('venda-quantidade').value);
+            const numTransacoes = parseInt(document.getElementById('venda-num-transacoes').value);
+            const preview   = document.getElementById('venda-preview');
+
+            if (!modelo || !quantidade || quantidade < 1 || !numTransacoes || numTransacoes < 1) {
+                preview.classList.add('hidden');
+                return;
+            }
+
+            const produtosAtuais = JSON.parse(localStorage.getItem('apple_produtos')) || [];
+            const prod = produtosAtuais.find(p => p.modelo === modelo);
+            if (!prod || !prod.valor) { preview.classList.add('hidden'); return; }
+
+            const total         = prod.valor * quantidade;
+            const ticketMedio   = total / numTransacoes;
+
+            document.getElementById('preview-preco-unit').textContent =
+                prod.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('preview-ticket').textContent =
+                ticketMedio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('preview-total').textContent =
+                total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            preview.classList.remove('hidden');
+        }
+
+        function registrarVenda() {
+            const produto       = document.getElementById('venda-produto').value;
+            const quantidade    = parseInt(document.getElementById('venda-quantidade').value);
+            const numTransacoes = parseInt(document.getElementById('venda-num-transacoes').value);
+            const erro          = document.getElementById('venda-erro');
+            const erroEstoque   = document.getElementById('venda-erro-estoque');
+            const sucesso       = document.getElementById('venda-sucesso');
+
+            erro.classList.add('hidden');
+            erroEstoque.classList.add('hidden');
+
+            if (!produto || !quantidade || quantidade < 1 || !numTransacoes || numTransacoes < 1) {
+                erro.classList.remove('hidden');
+                return;
+            }
+
+            // Busca preço cadastrado para calcular valor
+            const produtosAtuais = JSON.parse(localStorage.getItem('apple_produtos')) || [];
+            const prodAtual = produtosAtuais.find(p => p.modelo === produto);
+
+            if (!prodAtual) { erro.classList.remove('hidden'); return; }
+
+            if (prodAtual.quantidade < quantidade) {
+                erroEstoque.classList.remove('hidden');
+                return;
+            }
+
+            const valorCalculado = prodAtual.valor * quantidade;
+
+            // Desconta do estoque
+            prodAtual.quantidade -= quantidade;
+            produtos = produtosAtuais;
+            salvarProdutos();
+
+            const venda = {
+                id: Date.now(),
+                produto,
+                quantidade,
+                numTransacoes,
+                valor: valorCalculado,
+                precoUnit: prodAtual.valor,
+                horario: new Date().toISOString()
+            };
+
+            const lista = getVendas();
+            lista.unshift(venda);
+            salvarVendas(lista);
+
+            // Limpa campos
+            document.getElementById('venda-produto').value = '';
+            document.getElementById('venda-quantidade').value = '';
+            document.getElementById('venda-num-transacoes').value = '';
+            document.getElementById('venda-preview').classList.add('hidden');
+
+            sucesso.classList.remove('hidden');
+            setTimeout(() => sucesso.classList.add('hidden'), 3000);
+
+            renderVendas();
+            renderDashboard();
+        }
+
+        function renderVendas() {
+            preencherSelectVendas();
+
+            const lista = getVendas();
+
+            // Resumo
+            const totalValor       = lista.reduce((acc, v) => acc + v.valor, 0);
+            const totalQtd         = lista.reduce((acc, v) => acc + v.quantidade, 0);
+            const totalTransacoes  = lista.reduce((acc, v) => acc + (v.numTransacoes || 1), 0);
+            document.getElementById('venda-resumo-valor').textContent  = totalValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('venda-resumo-qtd').textContent    = totalQtd;
+            document.getElementById('venda-resumo-count').textContent  = totalTransacoes;
+
+            // Produto mais vendido
+            const porProduto = {};
+            lista.forEach(v => {
+                if (!porProduto[v.produto]) porProduto[v.produto] = { qtd: 0, valor: 0 };
+                porProduto[v.produto].qtd   += v.quantidade;
+                porProduto[v.produto].valor += v.valor;
+            });
+            const top = Object.entries(porProduto).sort((a, b) => b[1].qtd - a[1].qtd)[0];
+            document.getElementById('venda-top-produto').textContent =
+                top ? `${top[0]} (${top[1].qtd} un.)` : '—';
+            document.getElementById('venda-ticket-medio').textContent =
+                totalTransacoes > 0
+                    ? (totalValor / totalTransacoes).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                    : '—';
+
+            // Histórico
+            const historico = document.getElementById('venda-historico');
+            if (lista.length === 0) {
+                historico.innerHTML = '<p class="text-zinc-400 text-sm text-center py-10">Nenhuma venda registrada ainda.</p>';
+                return;
+            }
+
+            historico.innerHTML = lista.map(v => {
+                const dt        = new Date(v.horario);
+                const dataFmt   = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const horaFmt   = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const img       = imagensModelos[v.produto] || imagensModelos['default'];
+                const valorFmt  = v.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const unitFmt   = (v.precoUnit || v.valor / v.quantidade).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const transacoes = v.numTransacoes || 1;
+
+                return `
+                <div class="px-6 py-4 flex items-center gap-5 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors group">
+                    <img src="${img}" class="w-10 h-10 object-contain dark:invert opacity-75 flex-shrink-0">
+                    <div class="flex-1 grid grid-cols-5 gap-4 items-center">
+                        <div class="col-span-2">
+                            <p class="font-semibold text-sm dark:text-white">${v.produto}</p>
+                            <p class="text-xs text-zinc-400">${dataFmt} às ${horaFmt}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Qtd</p>
+                            <p class="font-semibold text-sm dark:text-white">${v.quantidade} un.</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Transações</p>
+                            <p class="font-semibold text-sm dark:text-white">${transacoes}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Total <span class="text-emerald-500">IA</span></p>
+                            <p class="font-semibold text-sm text-emerald-600 dark:text-emerald-400">${valorFmt}</p>
+                        </div>
+                    </div>
+                    <button onclick="excluirVenda(${v.id})"
+                        class="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 flex items-center justify-center flex-shrink-0 text-xs hover:bg-red-100">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
+        function excluirVenda(id) {
+            if (!confirm('Remover esta venda do histórico?')) return;
+            const lista = getVendas().filter(v => v.id !== id);
+            salvarVendas(lista);
+            renderVendas();
+        }
+
+        function limparVendas() {
+            salvarVendas([]);
+            renderVendas();
+        }
+
+        function renderBalancoInsumos() {
+            // Sempre relê do localStorage para capturar dados salvos pelo Vendedor em outra aba
+            const produtosAtuais    = JSON.parse(localStorage.getItem('apple_produtos'))    || [];
+            const mercadoriasAtuais = JSON.parse(localStorage.getItem('apple_mercadorias')) || [];
+
+            // Sincroniza variáveis globais com o que está no localStorage
+            produtos    = produtosAtuais;
+            mercadorias = mercadoriasAtuais;
+
+            // --- Cards de resumo ---
+            const totalProdutos = produtosAtuais.length;
+            const totalUnidades = mercadoriasAtuais.reduce((acc, m) => acc + (m.quantidade || 0), 0);
+            const valorTotal    = produtosAtuais.reduce((acc, p) => acc + (p.quantidade * p.valor), 0);
+            const itensAlerta   = produtosAtuais.filter(p => p.quantidade <= 5).length;
+
+            document.getElementById('bal-total-produtos').textContent = totalProdutos;
+            document.getElementById('bal-total-unidades').textContent = totalUnidades;
+            document.getElementById('bal-valor-total').textContent = valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('bal-itens-alerta').textContent = itensAlerta;
+            document.getElementById('bal-data-atualizacao').textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            // --- Tabela de produtos ---
+            const tabela = document.getElementById('bal-tabela');
+            if (produtosAtuais.length === 0) {
+                tabela.innerHTML = '<p class="text-zinc-400 text-sm text-center py-10">Nenhum insumo cadastrado ainda.</p>';
+            } else {
+                tabela.innerHTML = produtosAtuais.map(p => {
+                    const valorUn = (p.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const valorTotal = (p.quantidade * p.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const statusClass = p.quantidade <= 0
+                        ? 'text-red-500 bg-red-50 dark:bg-red-900/30'
+                        : p.quantidade <= 5
+                            ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/30'
+                            : 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30';
+                    const statusLabel = p.quantidade <= 0 ? 'Zerado' : p.quantidade <= 5 ? 'Baixo' : 'OK';
+                    const img = imagensModelos[p.modelo] || imagensModelos['default'];
+                    return `
+                    <div class="px-6 py-4 flex items-center gap-5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                        <img src="${img}" class="w-10 h-10 object-contain dark:invert opacity-80 flex-shrink-0">
+                        <div class="flex-1 grid grid-cols-5 gap-4 items-center">
+                            <div class="col-span-2">
+                                <p class="font-semibold text-sm dark:text-white">${p.modelo}</p>
+                                <p class="text-xs text-zinc-400 capitalize">${p.tipo}</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Estoque</p>
+                                <p class="font-semibold text-sm dark:text-white">${p.quantidade} un.</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Valor Unit.</p>
+                                <p class="font-semibold text-sm dark:text-white">${valorUn}</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Total</p>
+                                <p class="font-semibold text-sm text-indigo-600 dark:text-indigo-400">${valorTotal}</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-medium px-3 py-1 rounded-full ${statusClass} flex-shrink-0">${statusLabel}</span>
+                    </div>`;
+                }).join('');
+            }
+
+            // --- Últimas chegadas ---
+            const chegadas = document.getElementById('bal-chegadas');
+            if (mercadoriasAtuais.length === 0) {
+                chegadas.innerHTML = '<p class="text-zinc-400 text-sm text-center py-8">Nenhuma chegada registrada pelo vendedor.</p>';
+            } else {
+                chegadas.innerHTML = mercadoriasAtuais.slice(0, 6).map(m => {
+                    const dt = new Date(m.horario);
+                    const dataFmt = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const horaFmt = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                    return `
+                    <div class="px-6 py-4 flex items-center gap-5">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-truck-ramp-box text-indigo-500 text-xs"></i>
+                        </div>
+                        <div class="flex-1 grid grid-cols-4 gap-4 items-center">
+                            <div>
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Produto</p>
+                                <p class="font-medium text-sm dark:text-white">${m.produto}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Transportadora</p>
+                                <p class="font-medium text-sm dark:text-white">${m.fornecedor}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Volume</p>
+                                <p class="font-medium text-sm text-emerald-600 dark:text-emerald-400">+${m.quantidade} un.</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest mb-0.5">Data</p>
+                                <p class="font-medium text-sm dark:text-white">${dataFmt} ${horaFmt}</p>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        // ==================== STARTUP APP ====================
+        function initApp() {
+            renderDashboard();
+            showSection('dashboard');
+            atualizarBadgeNotif();
+            document.getElementById('tipo').addEventListener('change', (event) => populateModeloOptions(event.target.value));
+            populateModeloOptions(document.getElementById('tipo').value || 'iPhone');
+
+            // Inicializa snapshots para o polling detectar mudanças
+            localStorage.setItem('_poll_vendas_snap', localStorage.getItem('apple_vendas') || '[]');
+            localStorage.setItem('_poll_relatorio_snap', localStorage.getItem('apple_ultimo_relatorio') || '');
+
+            // Polling: relê localStorage a cada 5s e atualiza telas abertas do Gerente e Subgerente
+            setInterval(() => {
+                if (!usuarioAtual) return;
+                const role = usuarioAtual.role;
+                if (role !== 'Gerente' && role !== 'Subgerente') return;
+
+                const novosProdutos    = JSON.parse(localStorage.getItem('apple_produtos'))    || [];
+                const novasMercadorias = JSON.parse(localStorage.getItem('apple_mercadorias')) || [];
+                const novasVendas      = JSON.parse(localStorage.getItem('apple_vendas'))      || [];
+
+                const vendasAnteriores = JSON.parse(localStorage.getItem('_poll_vendas_snap')) || [];
+
+                const mudouProdutos    = JSON.stringify(novosProdutos)    !== JSON.stringify(produtos);
+                const mudouMercadorias = JSON.stringify(novasMercadorias) !== JSON.stringify(mercadorias);
+                const mudouVendas      = JSON.stringify(novasVendas)      !== JSON.stringify(vendasAnteriores);
+
+                if (mudouProdutos || mudouMercadorias || mudouVendas) {
+                    produtos    = novosProdutos;
+                    mercadorias = novasMercadorias;
+                    localStorage.setItem('_poll_vendas_snap', JSON.stringify(novasVendas));
+
+                    // Atualiza dashboard sempre
+                    renderDashboard();
+
+                    // Atualiza balanço se a sub-aba estiver visível (apenas Gerente)
+                    if (role === 'Gerente') {
+                        const subBalanco = document.getElementById('sub-content-balanco');
+                        if (subBalanco && !subBalanco.classList.contains('hidden')) {
+                            renderBalancoInsumos();
+                        }
+                    }
+
+                    // Atualiza notificações
+                    atualizarBadgeNotif();
+                }
+
+                // Polling para IA do Gerente: detecta novo relatório enviado pelo Subgerente
+                if (role === 'Gerente') {
+                    const relatorioAtual = localStorage.getItem('apple_ultimo_relatorio');
+                    const relatorioSnap  = localStorage.getItem('_poll_relatorio_snap');
+                    if (relatorioAtual && relatorioAtual !== relatorioSnap) {
+                        localStorage.setItem('_poll_relatorio_snap', relatorioAtual);
+                        // Só injeta se a mensagem ainda não foi adicionada (evita duplicata ao recarregar)
+                        const rel = JSON.parse(relatorioAtual);
+                        const horaEnvio = new Date(rel.enviado).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                        const linhasModelos = Object.entries(rel.porModelo || {})
+                            .map(([modelo, qtd]) => `• ${modelo}: ${qtd} unidade${qtd !== 1 ? 's' : ''} recebida${qtd !== 1 ? 's' : ''}`)
+                            .join('<br>');
+                        const msgIA = `📋 Relatório recebido do Subgerente às ${horaEnvio}.<br><br>Período: ${rel.periodo}<br>Total de chegadas: ${rel.totalChegadas}<br>Total de unidades recebidas: ${rel.totalUnidades}<br><br>${linhasModelos || 'Nenhuma chegada registrada no período.'}`;
+                        // Evita duplicar se a última mensagem da IA já for este mesmo relatório
+                        const ultimaMsgIA = chatHistory.slice().reverse().find(m => m.tipo === 'ia');
+                        if (!ultimaMsgIA || !ultimaMsgIA.msg.includes('Relatório recebido do Subgerente às ' + horaEnvio)) {
+                            chatHistory.push({ tipo: 'ia', msg: msgIA });
+                            const chatEl = document.getElementById('chat-messages');
+                            if (chatEl) {
+                                renderChat();
+                            }
+                        }
+                    }
+                }
+            }, 5000);
+        }
+        // ==================== MODAL PRODUTO ====================
+let produtoModalAtual = null;
+let graficoVendas = null;
+
+function abrirModalProduto(produto) {
+    produtoModalAtual = produto;
+    document.getElementById('modal-produto').classList.add('mostrar');
+    document.getElementById('modal-img').src = imagensModelos[produto.modelo] || imagensModelos.default;
+    document.getElementById('modal-titulo').textContent = produto.modelo;
+    document.getElementById('modal-subtitulo').textContent = produto.tipo;
+    
+    document.getElementById('periodo-modal').value = '30';
+    atualizarModalDados();
+    
+    // Listeners
+    document.getElementById('periodo-modal').onchange = atualizarModalDados;
+}
+
+function fecharModalProduto() {
+    document.getElementById('modal-produto').classList.remove('mostrar');
+    if (graficoVendas) {
+        graficoVendas.destroy();
+        graficoVendas = null;
+    }
+}
+
+function atualizarModalDados() {
+    if (!produtoModalAtual) return;
+    
+    const vendas = getVendas();
+    const periodoDias = parseInt(document.getElementById('periodo-modal').value);
+    const dataLimite = new Date();
+    dataLimite.setDate(dataLimite.getDate() - periodoDias);
+    
+    const vendasProduto = vendas.filter(v => 
+        v.produto === produtoModalAtual.modelo && 
+        new Date(v.horario) >= dataLimite
+    );
+    
+    // Métricas
+    const totalFaturado = vendasProduto.reduce((acc, v) => acc + v.valor, 0);
+    const totalVendidas = vendasProduto.reduce((acc, v) => acc + v.quantidade, 0);
+    const ticketMedio = totalVendidas > 0 ? totalFaturado / totalVendidas : 0;
+    
+    document.getElementById('total-faturado').textContent = 
+        `R$ ${totalFaturado.toLocaleString('pt-BR')}`;
+    document.getElementById('total-vendidas').textContent = totalVendidas;
+    document.getElementById('ticket-medio').textContent = 
+        `R$ ${ticketMedio.toLocaleString('pt-BR', {minimumFractionDigits: 0})}`;
+    document.getElementById('estoque-restante').textContent = 
+        `${produtoModalAtual.quantidade} un.`;
+    
+    // Gráfico
+    renderizarGrafico(vendasProduto);
+    
+    // Histórico
+    renderizarHistorico(vendasProduto);
+}
+
+function renderizarGrafico(vendas) {
+    const ctx = document.getElementById('grafico-vendas').getContext('2d');
+    
+    if (graficoVendas) graficoVendas.destroy();
+    
+    // Agrupar por dia
+    const vendasPorDia = {};
+    vendas.forEach(v => {
+        const data = new Date(v.horario);
+        const dia = data.toLocaleDateString('pt-BR', {day: '2-digit', month: 'short'});
+        if (!vendasPorDia[dia]) vendasPorDia[dia] = 0;
+        vendasPorDia[dia] += v.quantidade;
+    });
+    
+    graficoVendas = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Object.keys(vendasPorDia),
+            datasets: [{
+                label: 'Unidades Vendidas',
+                data: Object.values(vendasPorDia),
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#3b82f6',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { color: '#64748b' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#64748b' }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+}
+
+function renderizarHistorico(vendas) {
+    const container = document.getElementById('historico-vendas');
+    
+    if (vendas.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-12">
+                <i class="fa-solid fa-inbox text-4xl text-zinc-400 mb-4"></i>
+                <p class="text-zinc-400 text-lg font-medium">Nenhuma venda registrada</p>
+                <p class="text-zinc-300 text-sm mt-1">no período selecionado</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = vendas.slice(0, 10).map(v => {
+        const data = new Date(v.horario);
+        const dataFmt = data.toLocaleDateString('pt-BR');
+        const horaFmt = data.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+        const valorFmt = v.valor.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+        
+        return `
+            <div class="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-bag-shopping text-blue-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-sm">${dataFmt}</p>
+                            <p class="text-xs text-zinc-400">${horaFmt}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">${valorFmt}</p>
+                        <p class="text-xs text-zinc-400">${v.quantidade} un.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Fechar modal clicando fora
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'modal-produto') fecharModalProduto();
+});
+    </script>
+</body>
+</html>
